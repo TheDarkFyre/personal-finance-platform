@@ -28,7 +28,8 @@ public class BudgetRequestDTO {
     @Max(value = 12, message = "Month must be between 1 and 12")
     private int month;
 
-    @Min(value = 2000, message = "Year must be valid")
+    @Min(value = 2000, message = "Year must be valid (2000-2100)")
+    @Max(value = 2100, message = "Year must be valid (2000-2100)")
     private int year;
 
     private Long userId;

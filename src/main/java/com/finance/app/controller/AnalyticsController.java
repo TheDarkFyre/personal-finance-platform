@@ -19,7 +19,6 @@ import java.util.List;
 @RequestMapping("/api/v1/analytics")
 @RequiredArgsConstructor
 @Tag(name = "Analytics", description = "Financial insights, category spending breakdowns, and cash flow reports")
-@CrossOrigin(origins = "*")
 public class AnalyticsController {
 
     private final AnalyticsService analyticsService;

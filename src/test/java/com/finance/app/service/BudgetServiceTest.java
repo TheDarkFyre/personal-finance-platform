@@ -99,9 +99,10 @@ class BudgetServiceTest {
     @DisplayName("Should calculate budget progress accurately when UNDER limit")
     void shouldCalculateBudgetProgressUnderLimit() {
         when(budgetRepository.findByMonthAndYear(8, 2026)).thenReturn(List.of(testBudget));
-        // Mock $200 spent out of $500 limit
-        when(transactionRepository.getTotalSpentByCategoryIdAndDateRange(eq(1L), any(LocalDate.class), any(LocalDate.class)))
-                .thenReturn(new BigDecimal("200.00"));
+        // Mock $200 spent out of $500 limit via grouped batch query
+        List<Object[]> batchResult = List.<Object[]>of(new Object[]{1L, new BigDecimal("200.00")});
+        when(transactionRepository.getTotalSpentGroupedByCategoryId(any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(batchResult);
 
         List<BudgetProgressDTO> progressList = budgetService.getBudgetProgressForMonth(2026, 8);
 
@@ -119,9 +120,10 @@ class BudgetServiceTest {
     @DisplayName("Should calculate budget progress and trigger alert when OVER limit")
     void shouldCalculateBudgetProgressOverLimit() {
         when(budgetRepository.findByMonthAndYear(8, 2026)).thenReturn(List.of(testBudget));
-        // Mock $600 spent out of $500 limit
-        when(transactionRepository.getTotalSpentByCategoryIdAndDateRange(eq(1L), any(LocalDate.class), any(LocalDate.class)))
-                .thenReturn(new BigDecimal("600.00"));
+        // Mock $600 spent out of $500 limit via grouped batch query
+        List<Object[]> batchResult = List.<Object[]>of(new Object[]{1L, new BigDecimal("600.00")});
+        when(transactionRepository.getTotalSpentGroupedByCategoryId(any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(batchResult);
 
         List<BudgetProgressDTO> progressList = budgetService.getBudgetProgressForMonth(2026, 8);
 

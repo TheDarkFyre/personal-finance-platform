@@ -7,20 +7,29 @@ import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import org.springframework.web.util.UriComponentsBuilder;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.URI;
 import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Pattern;
 
 @Service
 @Slf4j
 public class CurrencyConversionService {
 
+    private record CachedRate(ExchangeRateResponseDTO dto, Instant expiresAt) {}
+
     private final RestTemplate restTemplate;
-    private final Map<String, ExchangeRateResponseDTO> cache = new ConcurrentHashMap<>();
+    private final Map<String, CachedRate> cache = new ConcurrentHashMap<>();
+    private static final Duration CACHE_TTL = Duration.ofHours(1);
+    private static final Pattern CURRENCY_CODE_PATTERN = Pattern.compile("^[A-Z]{3}$");
 
     private static final Map<String, BigDecimal> FALLBACK_USD_RATES = Map.of(
             "USD", new BigDecimal("1.00"),
@@ -41,16 +50,24 @@ public class CurrencyConversionService {
     }
 
     public ExchangeRateResponseDTO getExchangeRates(String baseCurrency) {
-        String base = baseCurrency != null ? baseCurrency.toUpperCase() : "USD";
+        String base = baseCurrency != null ? baseCurrency.trim().toUpperCase() : "USD";
+        if (!CURRENCY_CODE_PATTERN.matcher(base).matches()) {
+            base = "USD";
+        }
 
-        if (cache.containsKey(base)) {
-            return cache.get(base);
+        CachedRate cached = cache.get(base);
+        if (cached != null && Instant.now().isBefore(cached.expiresAt())) {
+            return cached.dto();
         }
 
         try {
-            String url = "https://api.frankfurter.app/latest?from=" + base;
+            URI uri = UriComponentsBuilder.fromHttpUrl("https://api.frankfurter.app/latest")
+                    .queryParam("from", base)
+                    .build()
+                    .toUri();
+
             @SuppressWarnings("unchecked")
-            Map<String, Object> response = restTemplate.getForObject(url, Map.class);
+            Map<String, Object> response = restTemplate.getForObject(uri, Map.class);
 
             if (response != null && response.containsKey("rates")) {
                 @SuppressWarnings("unchecked")
@@ -70,26 +87,34 @@ public class CurrencyConversionService {
                         .rates(rates)
                         .build();
 
-                cache.put(base, dto);
+                cache.put(base, new CachedRate(dto, Instant.now().plus(CACHE_TTL)));
                 return dto;
             }
         } catch (Exception e) {
             log.warn("Unable to fetch live currency rates from Frankfurter API: {}. Falling back to default rates.", e.getMessage());
         }
 
-        // Return fallback rates
+        // Generate triangulated fallback rates relative to requested base
+        Map<String, BigDecimal> triangulatedRates = new HashMap<>();
+        BigDecimal baseInUsd = FALLBACK_USD_RATES.getOrDefault(base, BigDecimal.ONE);
+
+        FALLBACK_USD_RATES.forEach((currency, rateInUsd) -> {
+            BigDecimal triangulatedRate = rateInUsd.divide(baseInUsd, 4, RoundingMode.HALF_UP);
+            triangulatedRates.put(currency, triangulatedRate);
+        });
+
         ExchangeRateResponseDTO fallback = ExchangeRateResponseDTO.builder()
-                .base("USD")
+                .base(base)
                 .date(LocalDate.now())
-                .rates(FALLBACK_USD_RATES)
+                .rates(triangulatedRates)
                 .build();
 
         return fallback;
     }
 
     public CurrencyConversionDTO convertCurrency(String from, String to, BigDecimal amount) {
-        String baseFrom = from.toUpperCase();
-        String baseTo = to.toUpperCase();
+        String baseFrom = from != null ? from.trim().toUpperCase() : "USD";
+        String baseTo = to != null ? to.trim().toUpperCase() : "USD";
 
         if (baseFrom.equals(baseTo)) {
             return CurrencyConversionDTO.builder()
@@ -102,14 +127,13 @@ public class CurrencyConversionService {
         }
 
         ExchangeRateResponseDTO ratesDto = getExchangeRates(baseFrom);
-        BigDecimal rate = ratesDto.getRates().get(baseTo);
+        BigDecimal rate = ratesDto.getRates() != null ? ratesDto.getRates().get(baseTo) : null;
 
         if (rate == null) {
-            // Fallback estimation using USD base
-            ExchangeRateResponseDTO usdRates = getExchangeRates("USD");
-            BigDecimal fromRateInUsd = usdRates.getRates().getOrDefault(baseFrom, BigDecimal.ONE);
-            BigDecimal toRateInUsd = usdRates.getRates().getOrDefault(baseTo, BigDecimal.ONE);
-            rate = toRateInUsd.divide(fromRateInUsd, 6, RoundingMode.HALF_UP);
+            // Fallback estimation using USD base triangulation
+            BigDecimal fromInUsd = FALLBACK_USD_RATES.getOrDefault(baseFrom, BigDecimal.ONE);
+            BigDecimal toInUsd = FALLBACK_USD_RATES.getOrDefault(baseTo, BigDecimal.ONE);
+            rate = toInUsd.divide(fromInUsd, 6, RoundingMode.HALF_UP);
         }
 
         BigDecimal convertedAmount = amount.multiply(rate).setScale(2, RoundingMode.HALF_UP);

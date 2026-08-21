@@ -85,12 +85,17 @@ public class AccountService {
     }
 
     public AccountResponseDTO mapToResponseDTO(Account account) {
+        boolean isOverdrawn = account.getType() != com.finance.app.entity.AccountType.CREDIT_CARD
+                && account.getBalance() != null
+                && account.getBalance().compareTo(BigDecimal.ZERO) < 0;
+
         return AccountResponseDTO.builder()
                 .id(account.getId())
                 .name(account.getName())
                 .type(account.getType())
                 .balance(account.getBalance())
                 .currency(account.getCurrency())
+                .isOverdrawn(isOverdrawn)
                 .userId(account.getUser() != null ? account.getUser().getId() : null)
                 .createdAt(account.getCreatedAt())
                 .updatedAt(account.getUpdatedAt())

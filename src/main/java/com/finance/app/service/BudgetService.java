@@ -46,10 +46,22 @@ public class BudgetService {
         LocalDate endDate = ym.atEndOfMonth();
 
         List<Budget> budgets = budgetRepository.findByMonthAndYear(month, year);
+        if (budgets.isEmpty()) {
+            return java.util.Collections.emptyList();
+        }
+
+        // Batch fetch all spent amounts grouped by category ID to eliminate N+1 database queries
+        List<Object[]> spentGrouped = transactionRepository.getTotalSpentGroupedByCategoryId(startDate, endDate);
+        java.util.Map<Long, BigDecimal> spentMap = spentGrouped.stream()
+                .collect(Collectors.toMap(
+                        row -> (Long) row[0],
+                        row -> (BigDecimal) row[1],
+                        BigDecimal::add
+                ));
 
         return budgets.stream().map(budget -> {
-            BigDecimal spent = transactionRepository.getTotalSpentByCategoryIdAndDateRange(
-                    budget.getCategory().getId(), startDate, endDate);
+            Long catId = budget.getCategory().getId();
+            BigDecimal spent = spentMap.getOrDefault(catId, BigDecimal.ZERO);
 
             BigDecimal limit = budget.getLimitAmount();
             BigDecimal remaining = limit.subtract(spent);

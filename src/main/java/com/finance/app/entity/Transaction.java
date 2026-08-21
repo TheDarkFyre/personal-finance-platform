@@ -12,7 +12,11 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "transactions")
+@Table(name = "transactions", indexes = {
+        @Index(name = "idx_tx_account_date", columnList = "account_id, transaction_date DESC"),
+        @Index(name = "idx_tx_category_date", columnList = "category_id, transaction_date"),
+        @Index(name = "idx_tx_date", columnList = "transaction_date")
+})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -24,12 +28,12 @@ public class Transaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id", nullable = false)
     @NotNull(message = "Account is required")
     private Account account;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
     @NotNull(message = "Category is required")
     private Category category;

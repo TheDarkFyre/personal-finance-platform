@@ -14,7 +14,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "accounts")
+@Table(name = "accounts", indexes = {
+        @Index(name = "idx_accounts_user_id", columnList = "user_id")
+})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -49,10 +51,8 @@ public class Account {
     @JsonIgnore
     private User user;
 
-    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
-    @Builder.Default
-    private List<Transaction> transactions = new ArrayList<>();
+    @Version
+    private Long version;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

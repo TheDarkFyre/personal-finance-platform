@@ -19,6 +19,7 @@ public class AccountResponseDTO {
     private AccountType type;
     private BigDecimal balance;
     private String currency;
+    private boolean isOverdrawn;
     private Long userId;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

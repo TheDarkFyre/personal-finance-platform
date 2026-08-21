@@ -16,7 +16,6 @@ import java.math.BigDecimal;
 @RequestMapping("/api/v1/currencies")
 @RequiredArgsConstructor
 @Tag(name = "Currencies & Exchange Rates", description = "Live multi-currency exchange rates and conversions")
-@CrossOrigin(origins = "*")
 public class CurrencyController {
 
     private final CurrencyConversionService currencyConversionService;

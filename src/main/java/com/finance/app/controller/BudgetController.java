@@ -19,7 +19,6 @@ import java.util.List;
 @RequestMapping("/api/v1/budgets")
 @RequiredArgsConstructor
 @Tag(name = "Budgets", description = "Monthly category budget limits and overspending tracking")
-@CrossOrigin(origins = "*")
 public class BudgetController {
 
     private final BudgetService budgetService;

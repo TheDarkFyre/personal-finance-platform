@@ -14,7 +14,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "subscriptions")
+@Table(name = "subscriptions", indexes = {
+        @Index(name = "idx_subs_status_due_date", columnList = "status, next_due_date"),
+        @Index(name = "idx_subs_account_id", columnList = "account_id")
+})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -35,12 +38,12 @@ public class Subscription {
     @Column(nullable = false, precision = 15, scale = 2)
     private BigDecimal amount;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
     @NotNull(message = "Category is required")
     private Category category;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id", nullable = false)
     @NotNull(message = "Account is required")
     private Account account;
@@ -55,6 +58,9 @@ public class Subscription {
     @Column(name = "next_due_date", nullable = false)
     private LocalDate nextDueDate;
 
+    @Column(name = "billing_day")
+    private Integer billingDay;
+
     @Enumerated(EnumType.STRING)
     @NotNull
     @Column(nullable = false)
@@ -65,6 +71,9 @@ public class Subscription {
     @JoinColumn(name = "user_id")
     @JsonIgnore
     private User user;
+
+    @Version
+    private Long version;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

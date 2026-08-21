@@ -28,18 +28,27 @@ public class TransactionService {
 
     @Transactional(readOnly = true)
     public Page<TransactionResponseDTO> getTransactions(Long accountId, Long categoryId, LocalDate startDate, LocalDate endDate, Pageable pageable) {
-        Page<Transaction> transactions;
+        org.springframework.data.jpa.domain.Specification<Transaction> spec = (root, query, cb) -> {
+            java.util.List<jakarta.persistence.criteria.Predicate> predicates = new java.util.ArrayList<>();
 
-        if (accountId != null) {
-            transactions = transactionRepository.findByAccountId(accountId, pageable);
-        } else if (categoryId != null) {
-            transactions = transactionRepository.findByCategoryId(categoryId, pageable);
-        } else if (startDate != null && endDate != null) {
-            transactions = transactionRepository.findByTransactionDateBetween(startDate, endDate, pageable);
-        } else {
-            transactions = transactionRepository.findAll(pageable);
-        }
+            if (accountId != null) {
+                predicates.add(cb.equal(root.get("account").get("id"), accountId));
+            }
+            if (categoryId != null) {
+                predicates.add(cb.equal(root.get("category").get("id"), categoryId));
+            }
+            if (startDate != null && endDate != null) {
+                predicates.add(cb.between(root.get("transactionDate"), startDate, endDate));
+            } else if (startDate != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("transactionDate"), startDate));
+            } else if (endDate != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("transactionDate"), endDate));
+            }
 
+            return cb.and(predicates.toArray(new jakarta.persistence.criteria.Predicate[0]));
+        };
+
+        Page<Transaction> transactions = transactionRepository.findAll(spec, pageable);
         return transactions.map(this::mapToResponseDTO);
     }
 

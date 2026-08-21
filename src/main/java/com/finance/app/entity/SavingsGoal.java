@@ -14,7 +14,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "savings_goals")
+@Table(name = "savings_goals", indexes = {
+        @Index(name = "idx_goals_status", columnList = "status"),
+        @Index(name = "idx_goals_account_id", columnList = "account_id")
+})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -57,7 +60,7 @@ public class SavingsGoal {
     @Builder.Default
     private GoalStatus status = GoalStatus.IN_PROGRESS;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "account_id")
     private Account account;
 
@@ -65,6 +68,9 @@ public class SavingsGoal {
     @JoinColumn(name = "user_id")
     @JsonIgnore
     private User user;
+
+    @Version
+    private Long version;
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

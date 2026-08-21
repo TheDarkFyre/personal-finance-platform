@@ -23,7 +23,6 @@ import java.time.LocalDate;
 @RequestMapping("/api/v1/transactions")
 @RequiredArgsConstructor
 @Tag(name = "Transactions", description = "Transaction recording, search, and balance management")
-@CrossOrigin(origins = "*")
 public class TransactionController {
 
     private final TransactionService transactionService;

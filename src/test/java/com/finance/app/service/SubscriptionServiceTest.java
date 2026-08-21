@@ -166,4 +166,44 @@ class SubscriptionServiceTest {
         SubscriptionResponseDTO resumed = subscriptionService.updateStatus(100L, SubscriptionStatus.ACTIVE);
         assertEquals(SubscriptionStatus.ACTIVE, resumed.getStatus());
     }
+
+    @Test
+    @DisplayName("Should throw IllegalStateException when attempting to pay an inactive subscription")
+    void shouldThrowWhenPayingInactiveSubscription() {
+        netflixSub.setStatus(SubscriptionStatus.PAUSED);
+        when(subscriptionRepository.findById(100L)).thenReturn(Optional.of(netflixSub));
+
+        assertThrows(IllegalStateException.class, () ->
+                subscriptionService.paySubscription(100L)
+        );
+    }
+
+    @Test
+    @DisplayName("Should advance month-end billing date from Jan 31 to Feb 28 while retaining billing day 31")
+    void shouldRetainBillingDayAcrossMonthBoundaries() {
+        Subscription jan31Sub = Subscription.builder()
+                .id(105L)
+                .name("End of Month Cloud Server")
+                .amount(new BigDecimal("50.00"))
+                .category(testCategory)
+                .account(testAccount)
+                .frequency(BillingFrequency.MONTHLY)
+                .nextDueDate(LocalDate.of(2025, 1, 31))
+                .billingDay(31)
+                .status(SubscriptionStatus.ACTIVE)
+                .build();
+
+        when(subscriptionRepository.findById(105L)).thenReturn(Optional.of(jan31Sub));
+        when(transactionService.createTransaction(any(TransactionRequestDTO.class)))
+                .thenReturn(TransactionResponseDTO.builder().id(1001L).build());
+        when(subscriptionRepository.save(any(Subscription.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        // Advance 1: Jan 31 -> Feb 28
+        subscriptionService.paySubscription(105L);
+        assertEquals(LocalDate.of(2025, 2, 28), jan31Sub.getNextDueDate());
+
+        // Advance 2: Feb 28 -> Mar 31 (retains original 31st billing day!)
+        subscriptionService.paySubscription(105L);
+        assertEquals(LocalDate.of(2025, 3, 31), jan31Sub.getNextDueDate());
+    }
 }

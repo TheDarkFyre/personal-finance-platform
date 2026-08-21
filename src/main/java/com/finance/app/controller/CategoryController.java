@@ -18,7 +18,6 @@ import java.util.List;
 @RequestMapping("/api/v1/categories")
 @RequiredArgsConstructor
 @Tag(name = "Categories", description = "Transaction categories (Food, Housing, Salary, etc.)")
-@CrossOrigin(origins = "*")
 public class CategoryController {
 
     private final CategoryService categoryService;

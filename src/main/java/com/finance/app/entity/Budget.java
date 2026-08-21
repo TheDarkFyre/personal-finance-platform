@@ -16,6 +16,8 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "budgets", uniqueConstraints = {
     @UniqueConstraint(columnNames = {"category_id", "budget_month", "budget_year"})
+}, indexes = {
+    @Index(name = "idx_budgets_month_year", columnList = "budget_month, budget_year")
 })
 @Getter
 @Setter
@@ -28,7 +30,7 @@ public class Budget {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
     @NotNull(message = "Category is required")
     private Category category;

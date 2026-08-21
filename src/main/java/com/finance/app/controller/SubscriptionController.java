@@ -21,7 +21,6 @@ import java.util.List;
 @RequestMapping("/api/v1/subscriptions")
 @RequiredArgsConstructor
 @Tag(name = "Subscriptions", description = "Recurring bills, subscriptions, and monthly burn rate tracking")
-@CrossOrigin(origins = "*")
 public class SubscriptionController {
 
     private final SubscriptionService subscriptionService;

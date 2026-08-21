@@ -129,4 +129,73 @@ class SavingsGoalServiceTest {
         // Verify account refunded: 5000 + 200 = 5200
         assertEquals(new BigDecimal("5200.00"), testAccount.getBalance());
     }
+
+    @Test
+    @DisplayName("Should throw InsufficientBalanceException when initial deposit exceeds account balance")
+    void shouldThrowExceptionWhenInitialDepositExceedsBalance() {
+        testAccount.setBalance(new BigDecimal("50.00"));
+        SavingsGoalRequestDTO request = SavingsGoalRequestDTO.builder()
+                .name("Dream Car")
+                .targetAmount(new BigDecimal("10000.00"))
+                .initialDeposit(new BigDecimal("500.00"))
+                .accountId(1L)
+                .build();
+
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(testAccount));
+
+        assertThrows(com.finance.app.exception.InsufficientBalanceException.class, () ->
+                savingsGoalService.createGoal(request)
+        );
+    }
+
+    @Test
+    @DisplayName("Should mark goal COMPLETED when completeGoal is called without changing account balance")
+    void shouldCompleteGoal() {
+        when(savingsGoalRepository.findById(10L)).thenReturn(Optional.of(testGoal));
+        when(savingsGoalRepository.save(any(SavingsGoal.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        BigDecimal priorBalance = testAccount.getBalance();
+        SavingsGoalResponseDTO response = savingsGoalService.completeGoal(10L);
+
+        assertEquals(GoalStatus.COMPLETED, response.getStatus());
+        assertEquals(priorBalance, testAccount.getBalance()); // funds remain spent on goal
+    }
+
+    @Test
+    @DisplayName("Should cancel goal and refund current saved amount back to linked account")
+    void shouldCancelGoalAndRefund() {
+        when(savingsGoalRepository.findById(10L)).thenReturn(Optional.of(testGoal));
+        when(savingsGoalRepository.save(any(SavingsGoal.class))).thenAnswer(inv -> inv.getArgument(0));
+
+        SavingsGoalResponseDTO response = savingsGoalService.cancelGoal(10L);
+
+        assertEquals(GoalStatus.CANCELLED, response.getStatus());
+        assertEquals(BigDecimal.ZERO, response.getCurrentAmount());
+        // 5000 + 600 = 5600 refunded
+        assertEquals(new BigDecimal("5600.00"), testAccount.getBalance());
+        verify(accountRepository, times(1)).save(testAccount);
+    }
+
+    @Test
+    @DisplayName("Should throw IllegalStateException when attempting to cancel an already COMPLETED goal")
+    void shouldThrowWhenCancellingCompletedGoal() {
+        testGoal.setStatus(GoalStatus.COMPLETED);
+        when(savingsGoalRepository.findById(10L)).thenReturn(Optional.of(testGoal));
+
+        assertThrows(IllegalStateException.class, () ->
+                savingsGoalService.cancelGoal(10L)
+        );
+    }
+
+    @Test
+    @DisplayName("Should throw IllegalStateException when attempting to withdraw from a COMPLETED or CANCELLED goal")
+    void shouldThrowWhenWithdrawingFromNonInProgressGoal() {
+        testGoal.setStatus(GoalStatus.COMPLETED);
+        when(savingsGoalRepository.findById(10L)).thenReturn(Optional.of(testGoal));
+
+        SavingsGoalContributionDTO req = SavingsGoalContributionDTO.builder().amount(new BigDecimal("100.00")).build();
+        assertThrows(IllegalStateException.class, () ->
+                savingsGoalService.withdrawFromGoal(10L, req)
+        );
+    }
 }

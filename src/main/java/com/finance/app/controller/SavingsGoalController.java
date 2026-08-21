@@ -20,7 +20,6 @@ import java.util.List;
 @RequestMapping("/api/v1/goals")
 @RequiredArgsConstructor
 @Tag(name = "Savings Goals", description = "Savings goals, milestones, and progress allocation")
-@CrossOrigin(origins = "*")
 public class SavingsGoalController {
 
     private final SavingsGoalService savingsGoalService;
@@ -59,6 +58,18 @@ public class SavingsGoalController {
             @PathVariable Long id,
             @Valid @RequestBody SavingsGoalContributionDTO contribution) {
         return ResponseEntity.ok(savingsGoalService.withdrawFromGoal(id, contribution));
+    }
+
+    @PutMapping("/{id}/complete")
+    @Operation(summary = "Mark savings goal as completed (funds were spent on the achieved goal)")
+    public ResponseEntity<SavingsGoalResponseDTO> completeGoal(@PathVariable Long id) {
+        return ResponseEntity.ok(savingsGoalService.completeGoal(id));
+    }
+
+    @PutMapping("/{id}/cancel")
+    @Operation(summary = "Cancel savings goal and automatically refund saved funds back to the linked account")
+    public ResponseEntity<SavingsGoalResponseDTO> cancelGoal(@PathVariable Long id) {
+        return ResponseEntity.ok(savingsGoalService.cancelGoal(id));
     }
 
     @DeleteMapping("/{id}")

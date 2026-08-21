@@ -85,7 +85,7 @@ public class CsvImportService {
                     }
 
                     LocalDate date = parseDate(columns[dateIdx].trim());
-                    String description = columns[descIdx].trim();
+                    String description = sanitizeDescription(columns[descIdx].trim());
                     BigDecimal rawAmount = parseAmount(columns[amountIdx].trim());
 
                     BigDecimal amount = rawAmount.abs();
@@ -125,6 +125,16 @@ public class CsvImportService {
         return summary;
     }
 
+    private String sanitizeDescription(String desc) {
+        if (desc == null || desc.isBlank()) return "Imported Transaction";
+        String trimmed = desc.trim();
+        char first = trimmed.charAt(0);
+        if (first == '=' || first == '+' || first == '-' || first == '@') {
+            return "'" + trimmed;
+        }
+        return trimmed;
+    }
+
     private Map<String, Integer> parseHeader(String headerLine) {
         Map<String, Integer> map = new HashMap<>();
         String[] headers = parseCsvLine(headerLine.toLowerCase());
@@ -154,11 +164,16 @@ public class CsvImportService {
     }
 
     private BigDecimal parseAmount(String amountStr) {
-        String clean = amountStr.replaceAll("[$,\\s]", "");
-        return new BigDecimal(clean);
+        String clean = amountStr.trim().replaceAll("[$,\\s]", "");
+        boolean isNegative = (clean.startsWith("(") && clean.endsWith(")")) || clean.startsWith("-") || clean.endsWith("-");
+        clean = clean.replaceAll("[(),+-]", "");
+        BigDecimal val = new BigDecimal(clean);
+        return isNegative ? val.negate() : val;
     }
 
     private Category matchCategory(String description, String explicitCat, BigDecimal rawAmount, List<Category> allCategories) {
+        CategoryType expectedType = rawAmount.compareTo(BigDecimal.ZERO) >= 0 ? CategoryType.INCOME : CategoryType.EXPENSE;
+
         // 1. Explicit Category Match if given in CSV
         if (!explicitCat.isBlank()) {
             for (Category c : allCategories) {
@@ -171,12 +186,13 @@ public class CsvImportService {
         // 2. Keyword heuristic matching from description
         String descLower = description.toLowerCase();
 
-        if (descLower.contains("payroll") || descLower.contains("salary") || descLower.contains("direct dep") || rawAmount.compareTo(BigDecimal.ZERO) > 0 && descLower.contains("deposit")) {
+        if (expectedType == CategoryType.INCOME || descLower.contains("payroll") || descLower.contains("salary") || descLower.contains("direct dep") || descLower.contains("deposit")) {
+            if (descLower.contains("dividend") || descLower.contains("interest") || descLower.contains("yield") || descLower.contains("capital gain")) {
+                return findCategory(allCategories, "Investment Returns", CategoryType.INCOME);
+            }
             return findCategory(allCategories, "Salary & Wages", CategoryType.INCOME);
         }
-        if (descLower.contains("dividend") || descLower.contains("interest") || descLower.contains("yield") || descLower.contains("capital gain")) {
-            return findCategory(allCategories, "Investment Returns", CategoryType.INCOME);
-        }
+
         if (descLower.contains("grocery") || descLower.contains("whole foods") || descLower.contains("trader joe") || descLower.contains("safeway") || descLower.contains("restaurant") || descLower.contains("cafe") || descLower.contains("coffee") || descLower.contains("doordash") || descLower.contains("ubereats") || descLower.contains("mcdonald")) {
             return findCategory(allCategories, "Food & Dining", CategoryType.EXPENSE);
         }
@@ -197,14 +213,13 @@ public class CsvImportService {
         }
 
         // 3. Fallback: Miscellaneous or first category of matching sign
-        CategoryType targetType = (rawAmount.compareTo(BigDecimal.ZERO) > 0 && descLower.contains("income")) ? CategoryType.INCOME : CategoryType.EXPENSE;
         for (Category c : allCategories) {
-            if (c.getName().equalsIgnoreCase("Miscellaneous") || c.getName().toLowerCase().contains("misc")) {
+            if ((c.getName().equalsIgnoreCase("Miscellaneous") || c.getName().toLowerCase().contains("misc")) && c.getType() == expectedType) {
                 return c;
             }
         }
         return allCategories.stream()
-                .filter(c -> c.getType() == targetType)
+                .filter(c -> c.getType() == expectedType)
                 .findFirst()
                 .orElse(allCategories.get(0));
     }
@@ -223,10 +238,17 @@ public class CsvImportService {
         List<String> tokens = new ArrayList<>();
         boolean inQuotes = false;
         StringBuilder sb = new StringBuilder();
+        char[] chars = line.toCharArray();
 
-        for (char c : line.toCharArray()) {
+        for (int i = 0; i < chars.length; i++) {
+            char c = chars[i];
             if (c == '\"') {
-                inQuotes = !inQuotes;
+                if (inQuotes && i + 1 < chars.length && chars[i + 1] == '\"') {
+                    sb.append('\"');
+                    i++; // skip escaped quote
+                } else {
+                    inQuotes = !inQuotes;
+                }
             } else if (c == ',' && !inQuotes) {
                 tokens.add(sb.toString().trim().replaceAll("^\"|\"$", ""));
                 sb.setLength(0);

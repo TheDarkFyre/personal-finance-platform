@@ -16,8 +16,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/accounts")
 @RequiredArgsConstructor
-@Tag(name = "Accounts", description = "Financial account management (Checking, Savings, Investments, etc.)")
-@CrossOrigin(origins = "*")
+@Tag(name = "Account Management", description = "Endpoints for managing bank, savings, and credit accounts")
 public class AccountController {
 
     private final AccountService accountService;

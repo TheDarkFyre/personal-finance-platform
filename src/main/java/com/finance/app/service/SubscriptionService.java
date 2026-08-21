@@ -99,6 +99,7 @@ public class SubscriptionService {
                 .account(account)
                 .frequency(dto.getFrequency())
                 .nextDueDate(dto.getNextDueDate())
+                .billingDay(dto.getNextDueDate() != null ? dto.getNextDueDate().getDayOfMonth() : null)
                 .status(SubscriptionStatus.ACTIVE)
                 .user(user)
                 .build();
@@ -121,6 +122,9 @@ public class SubscriptionService {
         sub.setAccount(account);
         sub.setFrequency(dto.getFrequency());
         sub.setNextDueDate(dto.getNextDueDate());
+        if (dto.getNextDueDate() != null) {
+            sub.setBillingDay(dto.getNextDueDate().getDayOfMonth());
+        }
 
         Subscription updated = subscriptionRepository.save(sub);
         return mapToResponseDTO(updated);
@@ -137,6 +141,10 @@ public class SubscriptionService {
     public TransactionResponseDTO paySubscription(Long id) {
         Subscription sub = findSubscriptionEntityById(id);
 
+        if (sub.getStatus() != SubscriptionStatus.ACTIVE) {
+            throw new IllegalStateException("Cannot pay a subscription that is " + sub.getStatus() + ". Please resume the subscription first.");
+        }
+
         // 1. Record the payment transaction
         TransactionRequestDTO txRequest = TransactionRequestDTO.builder()
                 .accountId(sub.getAccount().getId())
@@ -148,8 +156,8 @@ public class SubscriptionService {
 
         TransactionResponseDTO txResponse = transactionService.createTransaction(txRequest);
 
-        // 2. Advance the next due date based on frequency
-        LocalDate nextDate = advanceDueDate(sub.getNextDueDate(), sub.getFrequency());
+        // 2. Advance the next due date based on frequency and original billing day
+        LocalDate nextDate = advanceDueDate(sub.getNextDueDate(), sub.getFrequency(), sub.getBillingDay());
         sub.setNextDueDate(nextDate);
         subscriptionRepository.save(sub);
 
@@ -176,12 +184,25 @@ public class SubscriptionService {
         };
     }
 
-    private LocalDate advanceDueDate(LocalDate currentDate, BillingFrequency frequency) {
+    private LocalDate advanceDueDate(LocalDate currentDate, BillingFrequency frequency, Integer billingDay) {
+        int targetDay = (billingDay != null && billingDay > 0) ? billingDay : currentDate.getDayOfMonth();
         return switch (frequency) {
             case WEEKLY -> currentDate.plusWeeks(1);
-            case MONTHLY -> currentDate.plusMonths(1);
-            case QUARTERLY -> currentDate.plusMonths(3);
-            case ANNUAL -> currentDate.plusYears(1);
+            case MONTHLY -> {
+                LocalDate nextMonth = currentDate.plusMonths(1);
+                int actualDay = Math.min(targetDay, nextMonth.lengthOfMonth());
+                yield nextMonth.withDayOfMonth(actualDay);
+            }
+            case QUARTERLY -> {
+                LocalDate nextQuarter = currentDate.plusMonths(3);
+                int actualDay = Math.min(targetDay, nextQuarter.lengthOfMonth());
+                yield nextQuarter.withDayOfMonth(actualDay);
+            }
+            case ANNUAL -> {
+                LocalDate nextYear = currentDate.plusYears(1);
+                int actualDay = Math.min(targetDay, nextYear.lengthOfMonth());
+                yield nextYear.withDayOfMonth(actualDay);
+            }
         };
     }
 
