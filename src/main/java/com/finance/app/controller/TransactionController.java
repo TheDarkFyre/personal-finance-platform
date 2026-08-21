@@ -27,6 +27,15 @@ import java.time.LocalDate;
 public class TransactionController {
 
     private final TransactionService transactionService;
+    private final com.finance.app.service.CsvImportService csvImportService;
+
+    @PostMapping(value = "/import-csv", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Bulk import transactions from a bank statement CSV with intelligent auto-categorization")
+    public ResponseEntity<com.finance.app.dto.CsvImportSummaryDTO> importCsv(
+            @Parameter(description = "Account ID to associate imported transactions with") @RequestParam Long accountId,
+            @Parameter(description = "CSV statement file") @RequestParam("file") org.springframework.web.multipart.MultipartFile file) {
+        return ResponseEntity.ok(csvImportService.importCsv(file, accountId));
+    }
 
     @GetMapping
     @Operation(summary = "Get paginated transactions with optional account, category, or date range filtering")
@@ -59,3 +68,4 @@ public class TransactionController {
         return ResponseEntity.noContent().build();
     }
 }
+

@@ -35,7 +35,10 @@
                 <a href="/h2-console" target="_blank" class="px-3.5 py-2 text-xs font-semibold bg-slate-700/50 text-slate-300 border border-slate-600 rounded-lg hover:bg-slate-700 transition">
                     🗄️ H2 Console
                 </a>
-                <button onclick="openBudgetModal()" class="px-4 py-2 text-xs font-semibold bg-indigo-600/80 hover:bg-indigo-600 text-white rounded-lg transition">
+                <button onclick="openCsvModal()" class="px-3.5 py-2 text-xs font-semibold bg-emerald-600/80 hover:bg-emerald-600 text-white rounded-lg transition flex items-center gap-1.5">
+                    <span>📄</span> Import Bank CSV
+                </button>
+                <button onclick="openBudgetModal()" class="px-3.5 py-2 text-xs font-semibold bg-indigo-600/80 hover:bg-indigo-600 text-white rounded-lg transition">
                     🎯 Set Budget
                 </button>
                 <button onclick="openTxModal()" class="px-4 py-2 text-xs font-semibold bg-gradient-to-r from-emerald-500 to-teal-600 text-white rounded-lg shadow-lg shadow-emerald-500/20 hover:opacity-95 transition">
@@ -211,6 +214,38 @@
             </form>
         </div>
     </div>
+
+    <!-- Modal for CSV Bank Statement Import -->
+
+    <div id="csv-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="glass-card bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 space-y-6">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="text-xl">📄</span>
+                    <h3 class="text-lg font-semibold text-white">Import Bank Statement (CSV)</h3>
+                </div>
+                <button onclick="closeCsvModal()" class="text-slate-400 hover:text-white">&times;</button>
+            </div>
+            <form id="csv-form" onsubmit="submitCsv(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">Target Account</label>
+                    <select id="csv-account" required class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-emerald-500"></select>
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-400 mb-1">Select Bank Statement (.csv)</label>
+                    <input type="file" id="csv-file" accept=".csv" required class="w-full text-xs text-slate-400 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-slate-800 file:text-emerald-400 hover:file:bg-slate-700 cursor-pointer" />
+                </div>
+                <p class="text-[11px] text-slate-400 leading-relaxed">
+                    💡 Supports Chase, Bank of America, Amex, or standard CSV format (<code>Date, Description, Amount</code>). Smart engine auto-categorizes rows and updates account balances.
+                </p>
+                <div class="flex items-center justify-end gap-3 pt-2">
+                    <button type="button" onclick="closeCsvModal()" class="px-4 py-2 text-sm text-slate-400 hover:text-white">Cancel</button>
+                    <button type="submit" id="csv-submit-btn" class="px-5 py-2 text-sm font-semibold bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg transition">Upload & Import</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
 
     <script>
         let spendingChartInstance = null;
@@ -401,10 +436,24 @@
             const accSelect = document.getElementById('modal-account');
             const catSelect = document.getElementById('modal-category');
             const budgetCatSelect = document.getElementById('budget-category');
+            const csvAccSelect = document.getElementById('csv-account');
 
             accSelect.innerHTML = accountsData.map(a => `<option value="${a.id}">${a.name} (${formatCurrency(a.balance)})</option>`).join('');
+            if (csvAccSelect) {
+                csvAccSelect.innerHTML = accountsData.map(a => `<option value="${a.id}">${a.name} (${formatCurrency(a.balance)})</option>`).join('');
+            }
             catSelect.innerHTML = categoriesData.map(c => `<option value="${c.id}">[${c.type}] ${c.name}</option>`).join('');
             budgetCatSelect.innerHTML = categoriesData.filter(c => c.type === 'EXPENSE').map(c => `<option value="${c.id}">${c.name}</option>`).join('');
+        }
+
+        function openCsvModal() {
+            document.getElementById('csv-modal').classList.remove('hidden');
+            document.getElementById('csv-modal').classList.add('flex');
+        }
+
+        function closeCsvModal() {
+            document.getElementById('csv-modal').classList.add('hidden');
+            document.getElementById('csv-modal').classList.remove('flex');
         }
 
         function openTxModal() {
@@ -426,6 +475,48 @@
             document.getElementById('budget-modal').classList.add('hidden');
             document.getElementById('budget-modal').classList.remove('flex');
         }
+
+        async function submitCsv(e) {
+            e.preventDefault();
+            const accountId = document.getElementById('csv-account').value;
+            const fileInput = document.getElementById('csv-file');
+            if (!fileInput.files || fileInput.files.length === 0) {
+                alert('Please select a CSV statement file.');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('accountId', accountId);
+            formData.append('file', fileInput.files[0]);
+
+            const submitBtn = document.getElementById('csv-submit-btn');
+            submitBtn.textContent = 'Importing...';
+            submitBtn.disabled = true;
+
+            try {
+                const res = await fetch('/api/v1/transactions/import-csv', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (res.ok) {
+                    const result = await res.json();
+                    alert(`✅ CSV Import Successful!\n\n• Transactions Imported: ${result.totalImported}\n• Skipped: ${result.totalSkipped}\n• Total Parsed: ${result.totalParsed}`);
+                    closeCsvModal();
+                    document.getElementById('csv-form').reset();
+                    fetchData();
+                } else {
+                    const err = await res.json();
+                    alert('❌ Import Failed: ' + (err.message || 'Error processing CSV statement'));
+                }
+            } catch (err) {
+                alert('❌ Error uploading file: ' + err.message);
+            } finally {
+                submitBtn.textContent = 'Upload & Import';
+                submitBtn.disabled = false;
+            }
+        }
+
 
         async function submitTransaction(e) {
             e.preventDefault();
