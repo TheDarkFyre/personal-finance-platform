@@ -33,10 +33,10 @@ docker compose down
 
 ### Option 2: Run the Standalone Executable JAR (1-Click Desktop Run)
 
-Download [`personal-finance-api-1.0.0.jar`](https://github.com/TheDarkFyre/personal-finance-platform/releases/latest) from the [Releases section](https://github.com/TheDarkFyre/personal-finance-platform/releases/latest) and run:
+Download [`personal-finance-api-1.1.0.jar`](https://github.com/TheDarkFyre/personal-finance-platform/releases/latest) from the [Releases section](https://github.com/TheDarkFyre/personal-finance-platform/releases/latest) and run:
 
 ```bash
-java -jar personal-finance-api-1.0.0.jar
+java -jar personal-finance-api-1.1.0.jar
 ```
 
 *(Automatically launches your default web browser straight to the dashboard at `http://localhost:8080` in ~1.5 seconds!)*

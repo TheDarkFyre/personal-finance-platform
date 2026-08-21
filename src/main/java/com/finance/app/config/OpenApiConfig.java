@@ -18,7 +18,7 @@ public class OpenApiConfig {
         return new OpenAPI()
                 .info(new Info()
                         .title("Personal Financial Management Platform API")
-                        .version("1.0.0")
+                        .version("1.1.0")
                         .description("Cloud-Native REST API for managing accounts, categorizing transactions, and tracking financial health.")
                         .contact(new Contact()
                                 .name("Engineering Team")
