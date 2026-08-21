@@ -35,6 +35,9 @@ class SubscriptionControllerIntegrationTest {
     private ObjectMapper objectMapper;
 
     @Autowired
+    private com.finance.app.repository.SavingsGoalRepository savingsGoalRepository;
+
+    @Autowired
     private SubscriptionRepository subscriptionRepository;
 
     @Autowired
@@ -54,11 +57,13 @@ class SubscriptionControllerIntegrationTest {
 
     @BeforeEach
     void setUp() {
+        savingsGoalRepository.deleteAll();
         subscriptionRepository.deleteAll();
         budgetRepository.deleteAll();
         transactionRepository.deleteAll();
         accountRepository.deleteAll();
         categoryRepository.deleteAll();
+
 
         testAccount = accountRepository.save(Account.builder()
                 .name("Primary Checking")

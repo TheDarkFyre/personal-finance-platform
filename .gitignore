@@ -31,9 +31,18 @@ build/
 ### VS Code ###
 .vscode/
 
-### macOS / OS ###
+### macOS / Windows OS ###
 .DS_Store
 Thumbs.db
+desktop.ini
 
 ### Log files ###
 *.log
+
+### Personal & Local Notes (Kept locally, excluded from GitHub) ###
+personal_finance_api_starter_guide.md
+*.local
+*.local.*
+personal/
+scratch/
+notes/

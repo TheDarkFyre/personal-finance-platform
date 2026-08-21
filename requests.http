@@ -187,8 +187,50 @@ PUT {{baseUrl}}/subscriptions/1/resume
 DELETE {{baseUrl}}/subscriptions/1
 
 ### ==============================================================================
-### 7. ANALYTICS & REPORTS API
+### 7. SAVINGS GOALS & MILESTONES API
 ### ==============================================================================
+
+### Get All Savings Goals
+GET {{baseUrl}}/goals
+
+### Create New Savings Goal
+POST {{baseUrl}}/goals
+Content-Type: application/json
+
+{
+  "name": "Japan Trip 2027",
+  "targetAmount": 4000.00,
+  "initialDeposit": 1000.00,
+  "accountId": 2,
+  "targetDate": "2027-04-01",
+  "icon": "🗾",
+  "color": "#F59E0B"
+}
+
+### Deposit Funds to Savings Goal (Deducts from linked account)
+POST {{baseUrl}}/goals/1/deposit
+Content-Type: application/json
+
+{
+  "amount": 250.00,
+  "note": "Bonus allocation"
+}
+
+### Withdraw Funds from Savings Goal (Refunds to linked account)
+POST {{baseUrl}}/goals/1/withdraw
+Content-Type: application/json
+
+{
+  "amount": 100.00
+}
+
+### Delete Savings Goal
+DELETE {{baseUrl}}/goals/1
+
+### ==============================================================================
+### 8. ANALYTICS & REPORTS API
+### ==============================================================================
+
 
 
 

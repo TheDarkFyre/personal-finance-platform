@@ -28,6 +28,8 @@ public class DataInitializer implements CommandLineRunner {
     private final TransactionRepository transactionRepository;
     private final com.finance.app.repository.BudgetRepository budgetRepository;
     private final com.finance.app.repository.SubscriptionRepository subscriptionRepository;
+    private final com.finance.app.repository.SavingsGoalRepository savingsGoalRepository;
+
 
 
     @Override
@@ -187,9 +189,49 @@ public class DataInitializer implements CommandLineRunner {
 
             subscriptionRepository.saveAll(List.of(s1, s2, s3, s4));
 
+            // 7. Demo Savings Goals
+            SavingsGoal g1 = SavingsGoal.builder()
+                    .name("Emergency Fund (6 Months)")
+                    .targetAmount(new BigDecimal("10000.00"))
+                    .currentAmount(new BigDecimal("6500.00"))
+                    .targetDate(today.plusMonths(6))
+                    .account(savings)
+                    .icon("🛡️")
+                    .color("#10B981")
+                    .status(GoalStatus.IN_PROGRESS)
+                    .user(user)
+                    .build();
+
+            SavingsGoal g2 = SavingsGoal.builder()
+                    .name("Tokyo Autumn Vacation")
+                    .targetAmount(new BigDecimal("3500.00"))
+                    .currentAmount(new BigDecimal("2100.00"))
+                    .targetDate(today.plusMonths(3))
+                    .account(savings)
+                    .icon("✈️")
+                    .color("#3B82F6")
+                    .status(GoalStatus.IN_PROGRESS)
+                    .user(user)
+                    .build();
+
+            SavingsGoal g3 = SavingsGoal.builder()
+                    .name("New MacBook Pro M4")
+                    .targetAmount(new BigDecimal("2200.00"))
+                    .currentAmount(new BigDecimal("2200.00"))
+                    .targetDate(today.minusDays(5))
+                    .account(checking)
+                    .icon("💻")
+                    .color("#A78BFA")
+                    .status(GoalStatus.COMPLETED)
+                    .user(user)
+                    .build();
+
+            savingsGoalRepository.saveAll(List.of(g1, g2, g3));
+
             log.info("Initial data seeding completed successfully.");
         }
     }
 }
+
 
 
