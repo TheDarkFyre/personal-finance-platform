@@ -174,8 +174,13 @@ public class CsvImportService {
     private Category matchCategory(String description, String explicitCat, BigDecimal rawAmount, List<Category> allCategories) {
         CategoryType expectedType = rawAmount.compareTo(BigDecimal.ZERO) >= 0 ? CategoryType.INCOME : CategoryType.EXPENSE;
 
-        // 1. Explicit Category Match if given in CSV
+        // 1. Explicit Category Match if given in CSV (prefer matching expected type)
         if (!explicitCat.isBlank()) {
+            for (Category c : allCategories) {
+                if (c.getName().equalsIgnoreCase(explicitCat) && c.getType() == expectedType) {
+                    return c;
+                }
+            }
             for (Category c : allCategories) {
                 if (c.getName().equalsIgnoreCase(explicitCat)) {
                     return c;
@@ -186,7 +191,7 @@ public class CsvImportService {
         // 2. Keyword heuristic matching from description
         String descLower = description.toLowerCase();
 
-        if (expectedType == CategoryType.INCOME || descLower.contains("payroll") || descLower.contains("salary") || descLower.contains("direct dep") || descLower.contains("deposit")) {
+        if (expectedType == CategoryType.INCOME) {
             if (descLower.contains("dividend") || descLower.contains("interest") || descLower.contains("yield") || descLower.contains("capital gain")) {
                 return findCategory(allCategories, "Investment Returns", CategoryType.INCOME);
             }

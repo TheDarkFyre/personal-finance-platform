@@ -18,9 +18,11 @@ import java.time.LocalDate;
 public class TransactionRequestDTO {
 
     @NotNull(message = "Account ID is required")
+    @Positive(message = "Account ID must be greater than zero")
     private Long accountId;
 
     @NotNull(message = "Category ID is required")
+    @Positive(message = "Category ID must be greater than zero")
     private Long categoryId;
 
     @NotNull(message = "Transaction amount is required")

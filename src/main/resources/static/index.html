@@ -717,7 +717,7 @@
                                 <span class="text-xl" aria-hidden="true">${escapeHtml(b.categoryIcon || '📁')}</span>
                                 <span class="font-semibold text-sm text-slate-200">${escapeHtml(b.categoryName)}</span>
                             </div>
-                            <button onclick="deleteBudget(${b.id}, this)" aria-label="Delete budget" class="opacity-80 md:opacity-0 md:group-hover:opacity-100 text-xs text-rose-400 hover:text-rose-300 transition">✕</button>
+                            <button onclick="deleteBudget(${b.budgetId || b.id}, this)" aria-label="Delete budget" class="opacity-80 md:opacity-0 md:group-hover:opacity-100 text-xs text-rose-400 hover:text-rose-300 transition">✕</button>
                         </div>
                         <div class="space-y-1.5">
                             <div class="flex justify-between text-xs">

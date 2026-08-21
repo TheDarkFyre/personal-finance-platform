@@ -34,6 +34,7 @@ public class SavingsGoalRequestDTO {
     @FutureOrPresent(message = "Target date must be today or in the future")
     private LocalDate targetDate;
 
+    @Positive(message = "Account ID must be greater than zero")
     private Long accountId;
 
     @Size(max = 50, message = "Icon cannot exceed 50 characters")
@@ -42,5 +43,6 @@ public class SavingsGoalRequestDTO {
     @Size(max = 20, message = "Color cannot exceed 20 characters")
     private String color;
 
+    @Positive(message = "User ID must be greater than zero")
     private Long userId;
 }

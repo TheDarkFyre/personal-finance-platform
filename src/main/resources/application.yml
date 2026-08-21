@@ -3,12 +3,18 @@ spring:
     name: personal-finance-api
   profiles:
     active: dev
+  data:
+    web:
+      pageable:
+        max-page-size: 100
 
 server:
   port: 8080
   error:
-    include-message: always
-    include-binding-errors: always
+    include-message: never
+    include-binding-errors: never
+    include-stacktrace: never
+    include-exception: false
 
 # SpringDoc OpenAPI & Swagger UI
 springdoc:
@@ -25,10 +31,10 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics
+        include: health,info
   endpoint:
     health:
-      show-details: always
+      show-details: when_authorized
       probes:
         enabled: true
 

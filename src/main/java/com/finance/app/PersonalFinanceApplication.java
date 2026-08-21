@@ -5,6 +5,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.annotation.Profile;
 import org.springframework.context.event.EventListener;
 
 import java.awt.Desktop;
@@ -20,6 +21,7 @@ public class PersonalFinanceApplication {
                 .run(args);
     }
 
+    @Profile("dev")
     @EventListener(ApplicationReadyEvent.class)
     public void openBrowserOnStartup() {
         String url = "http://localhost:8080";

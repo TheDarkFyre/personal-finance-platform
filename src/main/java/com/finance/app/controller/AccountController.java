@@ -6,13 +6,16 @@ import com.finance.app.service.AccountService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Validated
 @RestController
 @RequestMapping("/api/v1/accounts")
 @RequiredArgsConstructor
@@ -29,7 +32,7 @@ public class AccountController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Get account details by ID")
-    public ResponseEntity<AccountResponseDTO> getAccountById(@PathVariable Long id) {
+    public ResponseEntity<AccountResponseDTO> getAccountById(@PathVariable @Positive(message = "Account ID must be greater than zero") Long id) {
         return ResponseEntity.ok(accountService.getAccountById(id));
     }
 
@@ -43,14 +46,14 @@ public class AccountController {
     @PutMapping("/{id}")
     @Operation(summary = "Update an existing financial account")
     public ResponseEntity<AccountResponseDTO> updateAccount(
-            @PathVariable Long id,
+            @PathVariable @Positive(message = "Account ID must be greater than zero") Long id,
             @Valid @RequestBody AccountRequestDTO request) {
         return ResponseEntity.ok(accountService.updateAccount(id, request));
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete an account")
-    public ResponseEntity<Void> deleteAccount(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteAccount(@PathVariable @Positive(message = "Account ID must be greater than zero") Long id) {
         accountService.deleteAccount(id);
         return ResponseEntity.noContent().build();
     }

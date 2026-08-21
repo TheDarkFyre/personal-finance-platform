@@ -166,7 +166,7 @@ public class SavingsGoalService {
         }
 
         // Refund active unspent savings back to linked account
-        if (goal.getAccount() != null && goal.getCurrentAmount().compareTo(BigDecimal.ZERO) > 0) {
+        if (goal.getAccount() != null && goal.getCurrentAmount() != null && goal.getCurrentAmount().compareTo(BigDecimal.ZERO) > 0) {
             Account account = goal.getAccount();
             account.setBalance(account.getBalance().add(goal.getCurrentAmount()));
             accountRepository.save(account);
@@ -180,8 +180,8 @@ public class SavingsGoalService {
     @Transactional
     public void deleteGoal(Long id) {
         SavingsGoal goal = findGoalEntityById(id);
-        // If an in-progress goal with active savings is deleted, automatically refund to account
-        if (goal.getStatus() == GoalStatus.IN_PROGRESS && goal.getAccount() != null && goal.getCurrentAmount().compareTo(BigDecimal.ZERO) > 0) {
+        // Refund any remaining savings back to the linked account regardless of goal status
+        if (goal.getAccount() != null && goal.getCurrentAmount() != null && goal.getCurrentAmount().compareTo(BigDecimal.ZERO) > 0) {
             Account account = goal.getAccount();
             account.setBalance(account.getBalance().add(goal.getCurrentAmount()));
             accountRepository.save(account);

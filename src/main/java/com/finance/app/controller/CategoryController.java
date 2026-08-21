@@ -7,13 +7,16 @@ import com.finance.app.service.CategoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Validated
 @RestController
 @RequestMapping("/api/v1/categories")
 @RequiredArgsConstructor
@@ -31,7 +34,7 @@ public class CategoryController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Get category details by ID")
-    public ResponseEntity<CategoryResponseDTO> getCategoryById(@PathVariable Long id) {
+    public ResponseEntity<CategoryResponseDTO> getCategoryById(@PathVariable @Positive(message = "Category ID must be greater than zero") Long id) {
         return ResponseEntity.ok(categoryService.getCategoryById(id));
     }
 
@@ -45,14 +48,14 @@ public class CategoryController {
     @PutMapping("/{id}")
     @Operation(summary = "Update an existing category")
     public ResponseEntity<CategoryResponseDTO> updateCategory(
-            @PathVariable Long id,
+            @PathVariable @Positive(message = "Category ID must be greater than zero") Long id,
             @Valid @RequestBody CategoryRequestDTO request) {
         return ResponseEntity.ok(categoryService.updateCategory(id, request));
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete a category")
-    public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteCategory(@PathVariable @Positive(message = "Category ID must be greater than zero") Long id) {
         categoryService.deleteCategory(id);
         return ResponseEntity.noContent().build();
     }

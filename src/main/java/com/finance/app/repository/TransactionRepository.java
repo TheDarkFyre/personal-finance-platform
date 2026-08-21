@@ -22,6 +22,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
 
     Page<Transaction> findByCategoryId(Long categoryId, Pageable pageable);
 
+    boolean existsByCategoryId(Long categoryId);
+
     Page<Transaction> findByTransactionDateBetween(LocalDate startDate, LocalDate endDate, Pageable pageable);
 
     @Query("SELECT new com.finance.app.dto.CategorySummaryDTO(t.category.name, SUM(t.amount)) " +

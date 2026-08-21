@@ -18,6 +18,7 @@ import java.math.BigDecimal;
 public class BudgetRequestDTO {
 
     @NotNull(message = "Category ID is required")
+    @Positive(message = "Category ID must be greater than zero")
     private Long categoryId;
 
     @NotNull(message = "Limit amount is required")
@@ -32,5 +33,6 @@ public class BudgetRequestDTO {
     @Max(value = 2100, message = "Year must be valid (2000-2100)")
     private int year;
 
+    @Positive(message = "User ID must be greater than zero")
     private Long userId;
 }

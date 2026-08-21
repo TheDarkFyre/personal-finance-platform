@@ -5,6 +5,7 @@ import com.finance.app.dto.BudgetRequestDTO;
 import com.finance.app.dto.BudgetResponseDTO;
 import com.finance.app.entity.Budget;
 import com.finance.app.entity.Category;
+import com.finance.app.entity.CategoryType;
 import com.finance.app.entity.User;
 import com.finance.app.exception.ResourceNotFoundException;
 import com.finance.app.repository.BudgetRepository;
@@ -94,6 +95,10 @@ public class BudgetService {
     public BudgetResponseDTO createOrUpdateBudget(BudgetRequestDTO dto) {
         Category category = categoryRepository.findById(dto.getCategoryId())
                 .orElseThrow(() -> new ResourceNotFoundException("Category not found with ID: " + dto.getCategoryId()));
+
+        if (category.getType() != CategoryType.EXPENSE) {
+            throw new IllegalArgumentException("Budgets can only be created for EXPENSE categories.");
+        }
 
         User user = null;
         if (dto.getUserId() != null) {

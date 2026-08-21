@@ -4,6 +4,7 @@ import com.finance.app.entity.AccountType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -33,5 +34,6 @@ public class AccountRequestDTO {
     @Pattern(regexp = "^[A-Z]{3}$", message = "Currency must be a valid 3-letter uppercase ISO code (e.g. USD, EUR)")
     private String currency;
 
+    @Positive(message = "User ID must be greater than zero")
     private Long userId;
 }

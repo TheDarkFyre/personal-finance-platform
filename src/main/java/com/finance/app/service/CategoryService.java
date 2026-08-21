@@ -6,6 +6,7 @@ import com.finance.app.entity.Category;
 import com.finance.app.entity.CategoryType;
 import com.finance.app.exception.ResourceNotFoundException;
 import com.finance.app.repository.CategoryRepository;
+import com.finance.app.repository.TransactionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,15 +19,11 @@ import java.util.stream.Collectors;
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final TransactionRepository transactionRepository;
 
     @Transactional(readOnly = true)
     public List<CategoryResponseDTO> getAllCategories(CategoryType type) {
-        List<Category> categories;
-        if (type != null) {
-            categories = categoryRepository.findByType(type);
-        } else {
-            categories = categoryRepository.findAll();
-        }
+        List<Category> categories = (type != null) ? categoryRepository.findByType(type) : categoryRepository.findAll();
         return categories.stream()
                 .map(this::mapToResponseDTO)
                 .collect(Collectors.toList());
@@ -68,6 +65,10 @@ public class CategoryService {
 
         if (!category.getName().equalsIgnoreCase(dto.getName()) && categoryRepository.existsByNameIgnoreCase(dto.getName())) {
             throw new IllegalArgumentException("Category with name '" + dto.getName() + "' already exists.");
+        }
+
+        if (category.getType() != dto.getType() && transactionRepository.existsByCategoryId(id)) {
+            throw new IllegalStateException("Cannot change category type for a category with existing historical transactions.");
         }
 
         category.setName(dto.getName());

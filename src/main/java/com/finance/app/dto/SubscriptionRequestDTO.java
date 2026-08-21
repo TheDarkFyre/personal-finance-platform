@@ -28,9 +28,11 @@ public class SubscriptionRequestDTO {
     private BigDecimal amount;
 
     @NotNull(message = "Category ID is required")
+    @Positive(message = "Category ID must be greater than zero")
     private Long categoryId;
 
     @NotNull(message = "Account ID is required")
+    @Positive(message = "Account ID must be greater than zero")
     private Long accountId;
 
     @NotNull(message = "Billing frequency is required")
@@ -39,5 +41,6 @@ public class SubscriptionRequestDTO {
     @NotNull(message = "Next due date is required")
     private LocalDate nextDueDate;
 
+    @Positive(message = "User ID must be greater than zero")
     private Long userId;
 }

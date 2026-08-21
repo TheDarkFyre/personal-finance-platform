@@ -9,13 +9,16 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Validated
 @RestController
 @RequestMapping("/api/v1/goals")
 @RequiredArgsConstructor
@@ -33,7 +36,7 @@ public class SavingsGoalController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Get savings goal details by ID")
-    public ResponseEntity<SavingsGoalResponseDTO> getGoalById(@PathVariable Long id) {
+    public ResponseEntity<SavingsGoalResponseDTO> getGoalById(@PathVariable @Positive(message = "Goal ID must be greater than zero") Long id) {
         return ResponseEntity.ok(savingsGoalService.getGoalById(id));
     }
 
@@ -47,7 +50,7 @@ public class SavingsGoalController {
     @PostMapping("/{id}/deposit")
     @Operation(summary = "Deposit funds towards a savings goal (deducts from linked account if present)")
     public ResponseEntity<SavingsGoalResponseDTO> depositToGoal(
-            @PathVariable Long id,
+            @PathVariable @Positive(message = "Goal ID must be greater than zero") Long id,
             @Valid @RequestBody SavingsGoalContributionDTO contribution) {
         return ResponseEntity.ok(savingsGoalService.depositToGoal(id, contribution));
     }
@@ -55,26 +58,26 @@ public class SavingsGoalController {
     @PostMapping("/{id}/withdraw")
     @Operation(summary = "Withdraw funds from a savings goal (refunds to linked account if present)")
     public ResponseEntity<SavingsGoalResponseDTO> withdrawFromGoal(
-            @PathVariable Long id,
+            @PathVariable @Positive(message = "Goal ID must be greater than zero") Long id,
             @Valid @RequestBody SavingsGoalContributionDTO contribution) {
         return ResponseEntity.ok(savingsGoalService.withdrawFromGoal(id, contribution));
     }
 
     @PutMapping("/{id}/complete")
     @Operation(summary = "Mark savings goal as completed (funds were spent on the achieved goal)")
-    public ResponseEntity<SavingsGoalResponseDTO> completeGoal(@PathVariable Long id) {
+    public ResponseEntity<SavingsGoalResponseDTO> completeGoal(@PathVariable @Positive(message = "Goal ID must be greater than zero") Long id) {
         return ResponseEntity.ok(savingsGoalService.completeGoal(id));
     }
 
     @PutMapping("/{id}/cancel")
     @Operation(summary = "Cancel savings goal and automatically refund saved funds back to the linked account")
-    public ResponseEntity<SavingsGoalResponseDTO> cancelGoal(@PathVariable Long id) {
+    public ResponseEntity<SavingsGoalResponseDTO> cancelGoal(@PathVariable @Positive(message = "Goal ID must be greater than zero") Long id) {
         return ResponseEntity.ok(savingsGoalService.cancelGoal(id));
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete a savings goal")
-    public ResponseEntity<Void> deleteGoal(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteGoal(@PathVariable @Positive(message = "Goal ID must be greater than zero") Long id) {
         savingsGoalService.deleteGoal(id);
         return ResponseEntity.noContent().build();
     }

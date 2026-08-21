@@ -116,7 +116,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ErrorResponseDTO> handleTypeMismatch(MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
         String paramName = ex.getName();
-        String message = "Parameter '" + paramName + "' has invalid value: '" + ex.getValue() + "'";
+        String message = "Parameter '" + paramName + "' has an invalid format or value";
         ErrorResponseDTO error = ErrorResponseDTO.builder()
                 .timestamp(LocalDateTime.now())
                 .status(HttpStatus.BAD_REQUEST.value())

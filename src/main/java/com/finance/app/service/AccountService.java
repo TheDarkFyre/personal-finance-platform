@@ -81,7 +81,6 @@ public class AccountService {
         accountRepository.delete(account);
     }
 
-    @Transactional(readOnly = true)
     public BigDecimal getTotalNetWorth() {
         List<Account> accounts = accountRepository.findAll();
         BigDecimal totalUsd = BigDecimal.ZERO;

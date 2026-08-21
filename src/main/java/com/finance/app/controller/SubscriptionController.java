@@ -10,13 +10,16 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Validated
 @RestController
 @RequestMapping("/api/v1/subscriptions")
 @RequiredArgsConstructor
@@ -40,7 +43,7 @@ public class SubscriptionController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Get subscription details by ID")
-    public ResponseEntity<SubscriptionResponseDTO> getSubscriptionById(@PathVariable Long id) {
+    public ResponseEntity<SubscriptionResponseDTO> getSubscriptionById(@PathVariable @Positive(message = "Subscription ID must be greater than zero") Long id) {
         return ResponseEntity.ok(subscriptionService.getSubscriptionById(id));
     }
 
@@ -54,32 +57,32 @@ public class SubscriptionController {
     @PutMapping("/{id}")
     @Operation(summary = "Update an existing subscription")
     public ResponseEntity<SubscriptionResponseDTO> updateSubscription(
-            @PathVariable Long id,
+            @PathVariable @Positive(message = "Subscription ID must be greater than zero") Long id,
             @Valid @RequestBody SubscriptionRequestDTO request) {
         return ResponseEntity.ok(subscriptionService.updateSubscription(id, request));
     }
 
     @PutMapping("/{id}/pause")
     @Operation(summary = "Pause an active subscription")
-    public ResponseEntity<SubscriptionResponseDTO> pauseSubscription(@PathVariable Long id) {
+    public ResponseEntity<SubscriptionResponseDTO> pauseSubscription(@PathVariable @Positive(message = "Subscription ID must be greater than zero") Long id) {
         return ResponseEntity.ok(subscriptionService.updateStatus(id, SubscriptionStatus.PAUSED));
     }
 
     @PutMapping("/{id}/resume")
     @Operation(summary = "Resume a paused subscription")
-    public ResponseEntity<SubscriptionResponseDTO> resumeSubscription(@PathVariable Long id) {
+    public ResponseEntity<SubscriptionResponseDTO> resumeSubscription(@PathVariable @Positive(message = "Subscription ID must be greater than zero") Long id) {
         return ResponseEntity.ok(subscriptionService.updateStatus(id, SubscriptionStatus.ACTIVE));
     }
 
     @PostMapping("/{id}/pay")
     @Operation(summary = "1-Click Pay: Records transaction payment and advances next billing due date")
-    public ResponseEntity<TransactionResponseDTO> paySubscription(@PathVariable Long id) {
+    public ResponseEntity<TransactionResponseDTO> paySubscription(@PathVariable @Positive(message = "Subscription ID must be greater than zero") Long id) {
         return ResponseEntity.ok(subscriptionService.paySubscription(id));
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete a tracked subscription")
-    public ResponseEntity<Void> deleteSubscription(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteSubscription(@PathVariable @Positive(message = "Subscription ID must be greater than zero") Long id) {
         subscriptionService.deleteSubscription(id);
         return ResponseEntity.noContent().build();
     }

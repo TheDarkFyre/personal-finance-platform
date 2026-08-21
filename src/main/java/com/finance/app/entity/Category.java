@@ -43,4 +43,7 @@ public class Category {
     @JsonIgnore
     @Builder.Default
     private List<Transaction> transactions = new ArrayList<>();
+
+    @Version
+    private Long version;
 }
