@@ -1,44 +1,54 @@
 # 💰 Personal Financial Management Platform (REST API)
 
+[![Cloud CI/CD Pipeline](https://github.com/TheDarkFyre/personal-finance-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/TheDarkFyre/personal-finance-platform/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-emerald.svg)](LICENSE)
+[![Java 21/23](https://img.shields.io/badge/Java-21%20%2F%2023-orange.svg)](https://openjdk.org/)
+[![Spring Boot 3.3.5](https://img.shields.io/badge/Spring%20Boot-3.3.5-brightgreen.svg)](https://spring.io/projects/spring-boot)
+[![Docker](https://img.shields.io/badge/Docker-Containerized-blue.svg)](https://www.docker.com/)
+
 A modern, cloud-native **Personal Financial Management Platform REST API** built with **Java 21/23**, **Spring Boot 3.3**, **PostgreSQL**, **Spring Data JPA**, **Docker**, **SpringDoc OpenAPI 3 (Swagger UI)**, **Spring Boot Actuator**, and **GitHub Actions CI/CD**.
 
 ---
 
 ## 🚀 Key Features
 
-1. **Multi-Account Portfolio Tracking**:
+1. **🏦 Multi-Account Portfolio Tracking**:
    - Track Checking, Savings, Credit Card, Investment, and Cash accounts.
-   - Real-time net worth calculation and balance reconciliations.
+   - Real-time net worth calculation and atomic balance reconciliations.
 
-2. **Monthly Category Budgets & Overspending Alerts**:
+2. **🎯 Monthly Category Budgets & Overspending Alerts**:
    - Set monthly spending limits per category (e.g. Dining, Housing, Utilities).
    - Real-time progress computation, percentage used, remaining allowance, and overspending warning flags.
 
-3. **Bank Statement CSV Bulk Importer**:
+3. **📥 Bank Statement CSV Bulk Importer**:
    - Upload bank statement `.csv` exports (Chase, Bank of America, Amex, or standard formats).
    - Intelligent keyword-based auto-categorization and atomic account balance updates.
 
-4. **Recurring Subscriptions & Upcoming Bills Tracker**:
+4. **🔄 Recurring Subscriptions & Upcoming Bills Tracker**:
    - Monitor recurring billing cycles (Monthly, Weekly, Quarterly, Annual).
    - Real-time monthly burn rate calculation and overdue/due-soon alerts.
    - 1-Click payment processing that auto-records transaction entries and advances the next billing date.
 
-5. **Savings Goals & Milestone Progress**:
+5. **🎯 Savings Goals & Milestone Progress**:
    - Create financial milestones (Emergency Fund, Vacations, Large Purchases).
    - Dynamic progress percentage, target completion countdown, and seamless deposits/withdrawals linked to bank accounts.
 
-6. **Advanced Financial Analytics**:
+6. **💱 Real-Time Multi-Currency Conversion**:
+   - Live exchange rates integrated with the Frankfurter FX API.
+   - On-the-fly currency conversions with thread-safe in-memory caching and fallback rate lookup.
+
+7. **📊 Advanced Financial Analytics**:
    - Real-time category spending breakdowns via custom JPQL aggregation queries.
    - Monthly cash flow summaries (Income vs. Expenses, Net Savings, and Savings Rate %).
    - Paginated transaction querying with multi-criteria filtering.
 
-7. **Cloud-Native & Production-Ready**:
+8. **🐳 Cloud-Native & Production-Ready**:
    - Cloud health probes and metrics via Spring Boot Actuator (`/actuator/health`).
    - Containerized deployment with multi-stage `Dockerfile` and `docker-compose.yml`.
-   - Continuous integration pipeline with automated testing via GitHub Actions.
+   - Continuous integration pipeline with automated testing and container publishing via GitHub Actions.
    - Dual environment profiles: `dev` (H2 zero-config in-memory DB + seed data) and `prod` (PostgreSQL / AWS RDS / Render / Railway).
 
-8. **Developer Experience**:
+9. **💻 Developer Experience**:
    - Interactive Swagger UI documentation at `/swagger-ui.html`.
    - Built-in visual dashboard frontend at `http://localhost:8080/`.
    - VS Code `requests.http` test collection for 1-click endpoint verification.
@@ -53,15 +63,33 @@ A modern, cloud-native **Personal Financial Management Platform REST API** built
 | **Framework** | Spring Boot 3.3.5 (Spring Web, Spring Data JPA, Spring Validation, Actuator) |
 | **Database** | PostgreSQL (Production/Docker), H2 In-Memory (Dev & Integration Testing) |
 | **API Docs** | SpringDoc OpenAPI 3 / Swagger UI |
-| **Testing** | JUnit 5, Mockito, Spring Boot Test / MockMvc |
+| **Testing** | JUnit 5, Mockito, Spring Boot Test / MockMvc (37 Tests) |
 | **Containerization**| Docker (Multi-stage Eclipse Temurin JDK 21), Docker Compose |
+| **Registry** | GitHub Container Registry (`ghcr.io/thedarkfyre/personal-finance-platform:latest`) |
 | **CI/CD** | GitHub Actions (`.github/workflows/ci.yml`) |
 
 ---
 
 ## ⚡ Quick Start
 
-### 1. Run Locally (Zero-Config with In-Memory H2 & Demo Data)
+### 1. Run with Docker Compose (Recommended)
+
+Run both the Spring Boot API and PostgreSQL database with one command:
+
+```bash
+docker compose up -d
+```
+
+*(Pulls the pre-built image from GitHub Container Registry or builds locally if source code is present)*
+
+To stop:
+```bash
+docker compose down
+```
+
+---
+
+### 2. Run Locally via Maven Wrapper (Zero-Config with In-Memory H2 & Demo Data)
 
 #### On Windows (PowerShell / CMD):
 ```powershell
@@ -82,24 +110,9 @@ Once started, access:
 
 ---
 
-### 2. Run with Docker & PostgreSQL
-
-Start both the Spring Boot API and PostgreSQL database with one command:
-
-```bash
-docker-compose up --build -d
-```
-
-To stop:
-```bash
-docker-compose down
-```
-
----
-
 ### 3. Run Automated Tests
 
-Execute unit and integration tests:
+Execute all 37 unit and integration tests:
 
 ```bash
 # Windows
@@ -151,6 +164,10 @@ Execute unit and integration tests:
 - `POST /api/v1/goals/{id}/deposit` - Contribute funds to a goal (deducts from linked account).
 - `POST /api/v1/goals/{id}/withdraw` - Withdraw savings from a goal (refunds linked account).
 - `DELETE /api/v1/goals/{id}` - Delete a savings goal.
+
+### 💱 Currency Conversion (`/api/v1/currencies`)
+- `GET /api/v1/currencies/rates?base=USD` - Live exchange rate table.
+- `GET /api/v1/currencies/convert?from=USD&to=EUR&amount=100.00` - Convert between currencies.
 
 ### 📊 Analytics (`/api/v1/analytics`)
 - `GET /api/v1/analytics/cash-flow` - Current month income, expenses, and savings rate.
