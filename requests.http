@@ -152,8 +152,44 @@ Content-Type: application/json
 DELETE {{baseUrl}}/budgets/1
 
 ### ==============================================================================
-### 6. ANALYTICS & REPORTS API
+### 6. SUBSCRIPTIONS & RECURRING BILLS API
 ### ==============================================================================
+
+### Get Subscription Summary (Monthly Burn Rate & Upcoming Bills)
+GET {{baseUrl}}/subscriptions/summary
+
+### Get All Subscriptions (Optionally filtered by ?status=ACTIVE)
+GET {{baseUrl}}/subscriptions?status=ACTIVE
+
+### Create New Recurring Subscription / Bill
+POST {{baseUrl}}/subscriptions
+Content-Type: application/json
+
+{
+  "name": "ChatGPT Plus",
+  "amount": 20.00,
+  "categoryId": 5,
+  "accountId": 1,
+  "frequency": "MONTHLY",
+  "nextDueDate": "2026-08-25"
+}
+
+### 1-Click Pay Subscription (Deducts balance & advances billing date by 1 cycle)
+POST {{baseUrl}}/subscriptions/1/pay
+
+### Pause Subscription
+PUT {{baseUrl}}/subscriptions/1/pause
+
+### Resume Subscription
+PUT {{baseUrl}}/subscriptions/1/resume
+
+### Delete Subscription
+DELETE {{baseUrl}}/subscriptions/1
+
+### ==============================================================================
+### 7. ANALYTICS & REPORTS API
+### ==============================================================================
+
 
 
 ### Get Spending by Category (Current Month)

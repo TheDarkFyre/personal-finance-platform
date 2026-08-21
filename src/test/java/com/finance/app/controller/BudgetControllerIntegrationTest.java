@@ -42,6 +42,9 @@ class BudgetControllerIntegrationTest {
     private ObjectMapper objectMapper;
 
     @Autowired
+    private com.finance.app.repository.SubscriptionRepository subscriptionRepository;
+
+    @Autowired
     private BudgetRepository budgetRepository;
 
     @Autowired
@@ -58,10 +61,12 @@ class BudgetControllerIntegrationTest {
 
     @BeforeEach
     void setUp() {
+        subscriptionRepository.deleteAll();
         budgetRepository.deleteAll();
         transactionRepository.deleteAll();
         accountRepository.deleteAll();
         categoryRepository.deleteAll();
+
 
         testCategory = categoryRepository.save(Category.builder()
                 .name("Groceries")

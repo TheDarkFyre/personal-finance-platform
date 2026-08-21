@@ -27,6 +27,8 @@ public class DataInitializer implements CommandLineRunner {
     private final CategoryRepository categoryRepository;
     private final TransactionRepository transactionRepository;
     private final com.finance.app.repository.BudgetRepository budgetRepository;
+    private final com.finance.app.repository.SubscriptionRepository subscriptionRepository;
+
 
     @Override
     @Transactional
@@ -138,8 +140,56 @@ public class DataInitializer implements CommandLineRunner {
 
             budgetRepository.saveAll(List.of(b1, b2, b3, b4));
 
+            // 6. Demo Subscriptions & Recurring Bills
+            Subscription s1 = Subscription.builder()
+                    .name("Netflix Premium (4K)")
+                    .amount(new BigDecimal("22.99"))
+                    .category(entertainment)
+                    .account(creditCard)
+                    .frequency(BillingFrequency.MONTHLY)
+                    .nextDueDate(today.plusDays(4))
+                    .status(SubscriptionStatus.ACTIVE)
+                    .user(user)
+                    .build();
+
+            Subscription s2 = Subscription.builder()
+                    .name("Spotify Duo")
+                    .amount(new BigDecimal("14.99"))
+                    .category(entertainment)
+                    .account(checking)
+                    .frequency(BillingFrequency.MONTHLY)
+                    .nextDueDate(today.plusDays(12))
+                    .status(SubscriptionStatus.ACTIVE)
+                    .user(user)
+                    .build();
+
+            Subscription s3 = Subscription.builder()
+                    .name("Equinox Fitness Club")
+                    .amount(new BigDecimal("185.00"))
+                    .category(health)
+                    .account(checking)
+                    .frequency(BillingFrequency.MONTHLY)
+                    .nextDueDate(today.plusDays(1))
+                    .status(SubscriptionStatus.ACTIVE)
+                    .user(user)
+                    .build();
+
+            Subscription s4 = Subscription.builder()
+                    .name("Google Fiber Internet")
+                    .amount(new BigDecimal("70.00"))
+                    .category(utilities)
+                    .account(checking)
+                    .frequency(BillingFrequency.MONTHLY)
+                    .nextDueDate(today.plusDays(8))
+                    .status(SubscriptionStatus.ACTIVE)
+                    .user(user)
+                    .build();
+
+            subscriptionRepository.saveAll(List.of(s1, s2, s3, s4));
+
             log.info("Initial data seeding completed successfully.");
         }
     }
 }
+
 

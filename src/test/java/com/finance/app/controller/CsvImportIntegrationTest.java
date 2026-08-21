@@ -36,6 +36,9 @@ class CsvImportIntegrationTest {
     private MockMvc mockMvc;
 
     @Autowired
+    private com.finance.app.repository.SubscriptionRepository subscriptionRepository;
+
+    @Autowired
     private BudgetRepository budgetRepository;
 
     @Autowired
@@ -51,10 +54,12 @@ class CsvImportIntegrationTest {
 
     @BeforeEach
     void setUp() {
+        subscriptionRepository.deleteAll();
         budgetRepository.deleteAll();
         transactionRepository.deleteAll();
         accountRepository.deleteAll();
         categoryRepository.deleteAll();
+
 
         testAccount = accountRepository.save(Account.builder()
                 .name("Chase Checking " + System.currentTimeMillis())
