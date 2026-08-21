@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,6 +22,7 @@ public class AccountService {
 
     private final AccountRepository accountRepository;
     private final UserRepository userRepository;
+    private final CurrencyConversionService currencyConversionService;
 
     @Transactional(readOnly = true)
     public List<AccountResponseDTO> getAllAccounts() {
@@ -81,7 +83,23 @@ public class AccountService {
 
     @Transactional(readOnly = true)
     public BigDecimal getTotalNetWorth() {
-        return accountRepository.getTotalNetWorth();
+        List<Account> accounts = accountRepository.findAll();
+        BigDecimal totalUsd = BigDecimal.ZERO;
+
+        for (Account account : accounts) {
+            String curr = (account.getCurrency() != null && !account.getCurrency().isBlank())
+                    ? account.getCurrency().trim().toUpperCase()
+                    : "USD";
+            BigDecimal balance = (account.getBalance() != null) ? account.getBalance() : BigDecimal.ZERO;
+
+            if ("USD".equals(curr)) {
+                totalUsd = totalUsd.add(balance);
+            } else {
+                BigDecimal converted = currencyConversionService.convertCurrency(curr, "USD", balance).getConvertedAmount();
+                totalUsd = totalUsd.add(converted != null ? converted : balance);
+            }
+        }
+        return totalUsd.setScale(2, RoundingMode.HALF_UP);
     }
 
     public AccountResponseDTO mapToResponseDTO(Account account) {

@@ -32,6 +32,9 @@ class AccountServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private CurrencyConversionService currencyConversionService;
+
     @InjectMocks
     private AccountService accountService;
 
@@ -92,5 +95,40 @@ class AccountServiceTest {
         when(accountRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> accountService.getAccountById(99L));
+    }
+
+    @Test
+    @DisplayName("Should calculate total net worth with multi-currency conversion to USD")
+    void shouldCalculateMultiCurrencyNetWorth() {
+        Account usdAccount = Account.builder()
+                .id(1L)
+                .name("USD Checking")
+                .type(AccountType.CHECKING)
+                .balance(new BigDecimal("1000.00"))
+                .currency("USD")
+                .build();
+
+        Account eurAccount = Account.builder()
+                .id(2L)
+                .name("EUR Account")
+                .type(AccountType.SAVINGS)
+                .balance(new BigDecimal("1000.00"))
+                .currency("EUR")
+                .build();
+
+        when(accountRepository.findAll()).thenReturn(List.of(usdAccount, eurAccount));
+        when(currencyConversionService.convertCurrency("EUR", "USD", new BigDecimal("1000.00")))
+                .thenReturn(com.finance.app.dto.CurrencyConversionDTO.builder()
+                        .from("EUR")
+                        .to("USD")
+                        .originalAmount(new BigDecimal("1000.00"))
+                        .convertedAmount(new BigDecimal("1086.96"))
+                        .build());
+
+        BigDecimal netWorth = accountService.getTotalNetWorth();
+
+        assertNotNull(netWorth);
+        // 1000.00 USD + 1086.96 USD = 2086.96 USD
+        assertEquals(new BigDecimal("2086.96"), netWorth);
     }
 }

@@ -21,7 +21,7 @@ import java.util.List;
 public class AnalyticsService {
 
     private final TransactionRepository transactionRepository;
-    private final AccountRepository accountRepository;
+    private final AccountService accountService;
 
     @Transactional(readOnly = true)
     public List<CategorySummaryDTO> getSpendingByCategory(LocalDate startDate, LocalDate endDate) {
@@ -79,7 +79,7 @@ public class AnalyticsService {
             endDate = LocalDate.now();
         }
 
-        BigDecimal totalBalance = accountRepository.getTotalNetWorth();
+        BigDecimal totalBalance = accountService.getTotalNetWorth();
         BigDecimal totalIncome = transactionRepository.getTotalAmountByTypeAndDateRange(CategoryType.INCOME, startDate, endDate);
         BigDecimal totalExpenses = transactionRepository.getTotalAmountByTypeAndDateRange(CategoryType.EXPENSE, startDate, endDate);
         BigDecimal netCashFlow = totalIncome.subtract(totalExpenses);
