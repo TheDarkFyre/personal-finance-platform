@@ -4,6 +4,7 @@ import com.finance.app.entity.BillingFrequency;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,6 +20,7 @@ import java.time.LocalDate;
 public class SubscriptionRequestDTO {
 
     @NotBlank(message = "Subscription name is required")
+    @Size(max = 100, message = "Subscription name cannot exceed 100 characters")
     private String name;
 
     @NotNull(message = "Amount is required")

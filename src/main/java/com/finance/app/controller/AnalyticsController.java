@@ -7,14 +7,18 @@ import com.finance.app.service.AnalyticsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
 
+@Validated
 @RestController
 @RequestMapping("/api/v1/analytics")
 @RequiredArgsConstructor
@@ -46,8 +50,8 @@ public class AnalyticsController {
     @GetMapping("/monthly-summary")
     @Operation(summary = "Get monthly financial summary (income, expenses, savings rate)")
     public ResponseEntity<MonthlySummaryDTO> getMonthlySummary(
-            @Parameter(description = "Year (e.g. 2026)") @RequestParam int year,
-            @Parameter(description = "Month (1-12)") @RequestParam int month) {
+            @Parameter(description = "Year (e.g. 2026)") @RequestParam @Min(2000) @Max(2100) int year,
+            @Parameter(description = "Month (1-12)") @RequestParam @Min(1) @Max(12) int month) {
         return ResponseEntity.ok(analyticsService.getMonthlySummary(year, month));
     }
 

@@ -113,6 +113,9 @@ public class CurrencyConversionService {
     }
 
     public CurrencyConversionDTO convertCurrency(String from, String to, BigDecimal amount) {
+        if (amount == null) {
+            throw new IllegalArgumentException("Conversion amount cannot be null");
+        }
         String baseFrom = from != null ? from.trim().toUpperCase() : "USD";
         String baseTo = to != null ? to.trim().toUpperCase() : "USD";
 

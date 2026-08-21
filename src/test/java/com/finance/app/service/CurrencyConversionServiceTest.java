@@ -85,4 +85,11 @@ class CurrencyConversionServiceTest {
         assertEquals(new BigDecimal("84.78"), result.getConvertedAmount());
         assertEquals(new BigDecimal("0.8478"), result.getRate());
     }
+
+    @Test
+    @DisplayName("Should throw IllegalArgumentException when amount is null")
+    void shouldThrowExceptionWhenAmountIsNull() {
+        assertThrows(IllegalArgumentException.class, () ->
+                currencyConversionService.convertCurrency("USD", "EUR", null));
+    }
 }

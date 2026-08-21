@@ -2,6 +2,7 @@ package com.finance.app.dto;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,5 +20,6 @@ public class SavingsGoalContributionDTO {
     @Positive(message = "Contribution amount must be greater than zero")
     private BigDecimal amount;
 
+    @Size(max = 255, message = "Note cannot exceed 255 characters")
     private String note;
 }

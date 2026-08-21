@@ -2,6 +2,7 @@ package com.finance.app.dto;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -29,5 +30,6 @@ public class TransactionRequestDTO {
     @NotNull(message = "Transaction date is required")
     private LocalDate transactionDate;
 
+    @Size(max = 255, message = "Description cannot exceed 255 characters")
     private String description;
 }

@@ -8,13 +8,17 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Validated
 @RestController
 @RequestMapping("/api/v1/budgets")
 @RequiredArgsConstructor
@@ -26,16 +30,16 @@ public class BudgetController {
     @GetMapping("/progress")
     @Operation(summary = "Get monthly budget progress, remaining amounts, and overspending alerts")
     public ResponseEntity<List<BudgetProgressDTO>> getBudgetProgress(
-            @Parameter(description = "Year (e.g. 2026)") @RequestParam int year,
-            @Parameter(description = "Month (1-12)") @RequestParam int month) {
+            @Parameter(description = "Year (e.g. 2026)") @RequestParam @Min(2000) @Max(2100) int year,
+            @Parameter(description = "Month (1-12)") @RequestParam @Min(1) @Max(12) int month) {
         return ResponseEntity.ok(budgetService.getBudgetProgressForMonth(year, month));
     }
 
     @GetMapping
     @Operation(summary = "Get configured budgets for a specific month and year")
     public ResponseEntity<List<BudgetResponseDTO>> getBudgets(
-            @Parameter(description = "Year (e.g. 2026)") @RequestParam int year,
-            @Parameter(description = "Month (1-12)") @RequestParam int month) {
+            @Parameter(description = "Year (e.g. 2026)") @RequestParam @Min(2000) @Max(2100) int year,
+            @Parameter(description = "Month (1-12)") @RequestParam @Min(1) @Max(12) int month) {
         return ResponseEntity.ok(budgetService.getBudgetsForMonth(year, month));
     }
 

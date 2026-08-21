@@ -61,7 +61,7 @@ public class SubscriptionService {
             monthlyBurnRate = monthlyBurnRate.add(monthlyCost);
 
             long daysUntil = ChronoUnit.DAYS.between(today, sub.getNextDueDate());
-            if (daysUntil <= 7) {
+            if (daysUntil >= 0 && daysUntil <= 7) {
                 dueSoonCount++;
             }
         }

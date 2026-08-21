@@ -6,12 +6,15 @@ import com.finance.app.service.CurrencyConversionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 
+@Validated
 @RestController
 @RequestMapping("/api/v1/currencies")
 @RequiredArgsConstructor
@@ -33,7 +36,7 @@ public class CurrencyController {
     public ResponseEntity<CurrencyConversionDTO> convertCurrency(
             @Parameter(description = "Source currency, e.g. USD") @RequestParam(defaultValue = "USD") String from,
             @Parameter(description = "Target currency, e.g. EUR") @RequestParam(defaultValue = "EUR") String to,
-            @Parameter(description = "Amount to convert") @RequestParam BigDecimal amount) {
+            @Parameter(description = "Amount to convert") @RequestParam @Positive(message = "Amount must be greater than zero") BigDecimal amount) {
         return ResponseEntity.ok(currencyConversionService.convertCurrency(from, to, amount));
     }
 }
