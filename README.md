@@ -1,8 +1,8 @@
 # 💰 Personal Financial Management Platform (REST API)
 
-[![Cloud CI/CD Pipeline](https://github.com/TheDarkFyre/personal-finance-platform/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/TheDarkFyre/personal-finance-platform/actions/workflows/ci.yml?query=branch%3Amain)
-[![Release](https://img.shields.io/github/v/release/TheDarkFyre/personal-finance-platform?color=emerald&label=Latest%20Release)](https://github.com/TheDarkFyre/personal-finance-platform/releases/latest)
-[![Docker](https://img.shields.io/badge/Docker-ghcr.io-blue.svg)](https://github.com/TheDarkFyre/personal-finance-platform/pkgs/container/personal-finance-platform)
+[![Cloud CI/CD Pipeline](https://github.com/ansh-lalwani/personal-finance-platform/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/ansh-lalwani/personal-finance-platform/actions/workflows/ci.yml?query=branch%3Amain)
+[![Release](https://img.shields.io/github/v/release/ansh-lalwani/personal-finance-platform?color=emerald&label=Latest%20Release)](https://github.com/ansh-lalwani/personal-finance-platform/releases/latest)
+[![Docker](https://img.shields.io/badge/Docker-ghcr.io-blue.svg)](https://github.com/ansh-lalwani/personal-finance-platform/pkgs/container/personal-finance-platform)
 [![Java 21/23](https://img.shields.io/badge/Java-21%20%2F%2023-orange.svg)](https://openjdk.org/)
 [![Spring Boot 3.3.5](https://img.shields.io/badge/Spring%20Boot-3.3.5-brightgreen.svg)](https://spring.io/projects/spring-boot)
 [![License: MIT](https://img.shields.io/badge/License-MIT-purple.svg)](LICENSE)
@@ -33,7 +33,7 @@ docker compose down
 
 ### Option 2: Run the Standalone Executable JAR (1-Click Desktop Run)
 
-Download [`personal-finance-api-1.1.0.jar`](https://github.com/TheDarkFyre/personal-finance-platform/releases/latest) from the [Releases section](https://github.com/TheDarkFyre/personal-finance-platform/releases/latest) and run:
+Download [`personal-finance-api-1.1.0.jar`](https://github.com/ansh-lalwani/personal-finance-platform/releases/latest) from the [Releases section](https://github.com/ansh-lalwani/personal-finance-platform/releases/latest) and run:
 
 ```bash
 java -jar personal-finance-api-1.1.0.jar
@@ -118,14 +118,14 @@ Once started, open your browser to:
 | **API Docs** | SpringDoc OpenAPI 3 / Swagger UI |
 | **Testing** | JUnit 5, Mockito, Spring Boot Test / MockMvc (37 Tests) |
 | **Containerization**| Docker (Multi-stage Eclipse Temurin JDK 21), Docker Compose |
-| **Registry** | GitHub Container Registry (`ghcr.io/thedarkfyre/personal-finance-platform:latest`) |
+| **Registry** | GitHub Container Registry (`ghcr.io/ansh-lalwani/personal-finance-platform:latest`) |
 | **CI/CD** | GitHub Actions (`.github/workflows/ci.yml`) |
 
 ---
 
 ## 🧪 Automated Testing
 
-Execute the comprehensive automated test suite (37 unit & integration tests):
+Execute the comprehensive automated test suite (48 unit & integration tests):
 
 ```bash
 # Windows
