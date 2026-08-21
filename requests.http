@@ -228,8 +228,22 @@ Content-Type: application/json
 DELETE {{baseUrl}}/goals/1
 
 ### ==============================================================================
-### 8. ANALYTICS & REPORTS API
+### 8. CURRENCY CONVERSION & EXCHANGE RATES API
 ### ==============================================================================
+
+### Get Real-Time Exchange Rates (Default: USD)
+GET {{baseUrl}}/currencies/rates?base=USD
+
+### Convert Currency (e.g. 250 USD to EUR)
+GET {{baseUrl}}/currencies/convert?from=USD&to=EUR&amount=250.00
+
+### Convert Currency (e.g. 50000 JPY to USD)
+GET {{baseUrl}}/currencies/convert?from=JPY&to=USD&amount=50000.00
+
+### ==============================================================================
+### 9. ANALYTICS & REPORTS API
+### ==============================================================================
+
 
 
 

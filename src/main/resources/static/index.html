@@ -137,14 +137,55 @@
 
         <!-- Main Content: Accounts & Chart -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Accounts List -->
-            <div class="glass-card rounded-2xl p-6 space-y-4">
-                <div class="flex items-center justify-between">
-                    <h2 class="text-lg font-semibold text-white">Your Accounts</h2>
-                    <span id="account-count" class="text-xs px-2.5 py-1 rounded-full bg-slate-800 text-slate-300">0 Accounts</span>
+            <!-- Accounts List & Live Currency Converter -->
+            <div class="space-y-6">
+                <div class="glass-card rounded-2xl p-6 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-lg font-semibold text-white">Your Accounts</h2>
+                        <span id="account-count" class="text-xs px-2.5 py-1 rounded-full bg-slate-800 text-slate-300">0 Accounts</span>
+                    </div>
+                    <div id="accounts-container" class="space-y-3">
+                        <!-- Rendered by JS -->
+                    </div>
                 </div>
-                <div id="accounts-container" class="space-y-3">
-                    <!-- Rendered by JS -->
+
+                <!-- Live Currency Converter Widget -->
+                <div class="glass-card rounded-2xl p-6 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h2 class="text-base font-semibold text-white flex items-center gap-2">
+                            <span>💱</span> Live Currency Converter
+                        </h2>
+                        <span class="text-[11px] text-cyan-400">Frankfurter Live FX</span>
+                    </div>
+                    <div class="space-y-3">
+                        <div class="grid grid-cols-3 gap-2">
+                            <input type="number" id="fx-amount" value="100" class="col-span-1 bg-slate-800 border border-slate-700 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-cyan-500" />
+                            <select id="fx-from" class="col-span-1 bg-slate-800 border border-slate-700 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-cyan-500">
+                                <option value="USD" selected>USD</option>
+                                <option value="EUR">EUR</option>
+                                <option value="GBP">GBP</option>
+                                <option value="CAD">CAD</option>
+                                <option value="JPY">JPY</option>
+                                <option value="INR">INR</option>
+                                <option value="AUD">AUD</option>
+                            </select>
+                            <select id="fx-to" class="col-span-1 bg-slate-800 border border-slate-700 rounded-lg p-2 text-xs text-white focus:outline-none focus:border-cyan-500">
+                                <option value="EUR" selected>EUR</option>
+                                <option value="USD">USD</option>
+                                <option value="GBP">GBP</option>
+                                <option value="CAD">CAD</option>
+                                <option value="JPY">JPY</option>
+                                <option value="INR">INR</option>
+                                <option value="AUD">AUD</option>
+                            </select>
+                        </div>
+                        <button onclick="calculateFx()" class="w-full py-2 text-xs font-semibold bg-cyan-600/30 hover:bg-cyan-600/50 text-cyan-300 border border-cyan-500/40 rounded-lg transition">
+                            Convert Exchange Rate
+                        </button>
+                        <div id="fx-result" class="text-center py-1 text-xs text-slate-300 font-medium">
+                            100 USD ≈ 92.00 EUR
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -159,6 +200,7 @@
                 </div>
             </div>
         </div>
+
 
         <!-- Recent Transactions -->
         <div class="glass-card rounded-2xl p-6">
@@ -965,11 +1007,33 @@
             if (res.ok) fetchData();
         }
 
+        async function calculateFx() {
+            const amount = parseFloat(document.getElementById('fx-amount').value) || 1;
+            const from = document.getElementById('fx-from').value;
+            const to = document.getElementById('fx-to').value;
+
+            const resDiv = document.getElementById('fx-result');
+            resDiv.textContent = 'Fetching exchange rate...';
+
+            try {
+                const res = await fetch(`/api/v1/currencies/convert?from=${from}&to=${to}&amount=${amount}`);
+                if (res.ok) {
+                    const data = await res.json();
+                    resDiv.innerHTML = `<strong>${data.originalAmount} ${data.from}</strong> = <span class="text-cyan-400 font-bold">${data.convertedAmount} ${data.to}</span> <span class="text-[11px] text-slate-500">(1 ${data.from} = ${data.rate} ${data.to})</span>`;
+                } else {
+                    resDiv.textContent = 'Conversion failed';
+                }
+            } catch (err) {
+                resDiv.textContent = 'Error contacting rates service';
+            }
+        }
+
         function formatCurrency(val) {
             return '$' + Number(val).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
         }
 
         window.onload = fetchData;
+
     </script>
 </body>
 </html>
