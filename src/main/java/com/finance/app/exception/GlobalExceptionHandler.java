@@ -70,7 +70,20 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponseDTO> handleDataIntegrityViolation(org.springframework.dao.DataIntegrityViolationException ex, HttpServletRequest request) {
+        ErrorResponseDTO error = ErrorResponseDTO.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.CONFLICT.value())
+                .error("Data Integrity Conflict")
+                .message("Cannot perform operation due to existing data constraints (e.g. resource is referenced by existing transactions, goals, or subscriptions)")
+                .path(request.getRequestURI())
+                .build();
+        return new ResponseEntity<>(error, HttpStatus.CONFLICT);
+    }
+
     @ExceptionHandler(Exception.class)
+
     public ResponseEntity<ErrorResponseDTO> handleGeneralException(Exception ex, HttpServletRequest request) {
         ErrorResponseDTO error = ErrorResponseDTO.builder()
                 .timestamp(LocalDateTime.now())
