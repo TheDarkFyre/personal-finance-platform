@@ -1,0 +1,153 @@
+### Personal Finance Platform - API Request Collection
+### Base URL
+@baseUrl = http://localhost:8080/api/v1
+
+### ==============================================================================
+### 1. HEALTH & METRICS (Spring Boot Actuator)
+### ==============================================================================
+
+### Check API Health Status
+GET http://localhost:8080/actuator/health
+
+### Check API Info
+GET http://localhost:8080/actuator/info
+
+### ==============================================================================
+### 2. ACCOUNTS API
+### ==============================================================================
+
+### Get All Accounts
+GET {{baseUrl}}/accounts
+
+### Get Account by ID
+GET {{baseUrl}}/accounts/1
+
+### Create a New Account
+POST {{baseUrl}}/accounts
+Content-Type: application/json
+
+{
+  "name": "Investment Portfolio",
+  "type": "INVESTMENT",
+  "initialBalance": 25000.00,
+  "currency": "USD"
+}
+
+### Update an Account
+PUT {{baseUrl}}/accounts/1
+Content-Type: application/json
+
+{
+  "name": "Primary Premier Checking",
+  "type": "CHECKING",
+  "currency": "USD"
+}
+
+### Delete an Account
+DELETE {{baseUrl}}/accounts/3
+
+### ==============================================================================
+### 3. CATEGORIES API
+### ==============================================================================
+
+### Get All Categories
+GET {{baseUrl}}/categories
+
+### Get Expense Categories Only
+GET {{baseUrl}}/categories?type=EXPENSE
+
+### Get Income Categories Only
+GET {{baseUrl}}/categories?type=INCOME
+
+### Create New Category
+POST {{baseUrl}}/categories
+Content-Type: application/json
+
+{
+  "name": "Freelance Design",
+  "type": "INCOME",
+  "description": "Consulting and UI/UX design income",
+  "icon": "🎨",
+  "color": "#8B5CF6"
+}
+
+### ==============================================================================
+### 4. TRANSACTIONS API
+### ==============================================================================
+
+### Get All Transactions (Paginated)
+GET {{baseUrl}}/transactions?page=0&size=20
+
+### Filter Transactions by Account
+GET {{baseUrl}}/transactions?accountId=1
+
+### Filter Transactions by Date Range
+GET {{baseUrl}}/transactions?startDate=2026-08-01&endDate=2026-08-31
+
+### Record New Expense Transaction (Atomically deducts balance)
+POST {{baseUrl}}/transactions
+Content-Type: application/json
+
+{
+  "accountId": 1,
+  "categoryId": 1,
+  "amount": 42.75,
+  "transactionDate": "2026-08-20",
+  "description": "Coffee and pastries at Blue Bottle"
+}
+
+### Record New Income Transaction (Atomically increments balance)
+POST {{baseUrl}}/transactions
+Content-Type: application/json
+
+{
+  "accountId": 1,
+  "categoryId": 7,
+  "amount": 2800.00,
+  "transactionDate": "2026-08-20",
+  "description": "Mid-month bonus"
+}
+
+### Delete Transaction (Atomically reverts balance adjustment)
+DELETE {{baseUrl}}/transactions/1
+
+### ==============================================================================
+### 5. BUDGETS API (Monthly Limits & Overspending Warnings)
+### ==============================================================================
+
+### Get Budget Progress for Current Month (Actual Spent vs Limit & Warning Status)
+GET {{baseUrl}}/budgets/progress?year=2026&month=8
+
+### Get All Configured Budgets for Month
+GET {{baseUrl}}/budgets?year=2026&month=8
+
+### Set or Update Category Budget Limit
+POST {{baseUrl}}/budgets
+Content-Type: application/json
+
+{
+  "categoryId": 1,
+  "limitAmount": 400.00,
+  "month": 8,
+  "year": 2026
+}
+
+### Delete Budget Limit
+DELETE {{baseUrl}}/budgets/1
+
+### ==============================================================================
+### 6. ANALYTICS & REPORTS API
+### ==============================================================================
+
+
+### Get Spending by Category (Current Month)
+GET {{baseUrl}}/analytics/spending-by-category
+
+### Get Income by Category
+GET {{baseUrl}}/analytics/income-by-category
+
+### Get Monthly Financial Summary
+GET {{baseUrl}}/analytics/monthly-summary?year=2026&month=8
+
+### Get Full Cash Flow Summary
+GET {{baseUrl}}/analytics/cash-flow
