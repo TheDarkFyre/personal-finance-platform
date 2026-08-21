@@ -1,6 +1,6 @@
 # 💰 Personal Financial Management Platform (REST API)
 
-[![Cloud CI/CD Pipeline](https://github.com/TheDarkFyre/personal-finance-platform/actions/workflows/ci.yml/badge.svg)](https://github.com/TheDarkFyre/personal-finance-platform/actions)
+[![Cloud CI/CD Pipeline](https://github.com/TheDarkFyre/personal-finance-platform/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/TheDarkFyre/personal-finance-platform/actions/workflows/ci.yml?query=branch%3Amain)
 [![Release](https://img.shields.io/github/v/release/TheDarkFyre/personal-finance-platform?color=emerald&label=Latest%20Release)](https://github.com/TheDarkFyre/personal-finance-platform/releases/latest)
 [![Docker](https://img.shields.io/badge/Docker-ghcr.io-blue.svg)](https://github.com/TheDarkFyre/personal-finance-platform/pkgs/container/personal-finance-platform)
 [![Java 21/23](https://img.shields.io/badge/Java-21%20%2F%2023-orange.svg)](https://openjdk.org/)
